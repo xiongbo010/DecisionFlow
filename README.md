@@ -1,10 +1,12 @@
 # DecisionFlow v0.0
 
-DecisionFlow models the probability of an entire decision flow. It combines
-local probabilities from typed decision models into a normalized joint over
-multiple decisions or multi-step trajectories, optionally conditioned on hard
-and soft constraints. From the same distribution it computes marginals, joint
-MAP assignments, trajectory probabilities, and consistency mass.
+![DecisionFlow: from typed decisions to structured decision flows](assets/decisionflow-concept.svg)
+
+DecisionFlow models probability over complete structured decisions. It combines
+local predictions into a joint distribution over multiple decisions or
+multi-step trajectories, where each complete assignment represents a possible
+decision world. The same model supports exact marginals, joint MAP, trajectory
+probabilities, and consistency mass under optional hard or soft constraints.
 
 The model layer is provider-neutral: it works with hosted APIs, local models,
 Python callables, or precomputed probabilities. Constraint frontends and
