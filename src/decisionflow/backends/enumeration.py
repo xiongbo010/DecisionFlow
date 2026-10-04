@@ -29,7 +29,7 @@ class EnumerationBackend:
         total_worlds = math.prod(len(question.options) for question in request.questions)
         if total_worlds > self.max_worlds:
             raise ValueError(
-                "enumeration needs %d worlds, above max_worlds=%d; install worldjev[sdd]"
+                "enumeration needs %d worlds, above max_worlds=%d; install decisionflow[sdd]"
                 % (total_worlds, self.max_worlds)
             )
         started = time.perf_counter()

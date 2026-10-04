@@ -1,14 +1,14 @@
 """Regression tests for every structural family exercised by the pilots.
 
 These tests use synthetic probabilities. Dataset loading and metrics remain in
-the experiment code; WorldJev core is tested only on the resulting finite
+the experiment code; DecisionFlow core is tested only on the resulting finite
 decision schemas and rules.
 """
 
 import importlib.util
 import unittest
 
-from worldjev import WorldJev
+from decisionflow import DecisionFlow
 
 
 HAS_SDD = importlib.util.find_spec("pysdd") is not None
@@ -39,7 +39,7 @@ class PilotShapeTests(unittest.TestCase):
             {"name": "H2-H", "expr": implication("H2", "H")},
             {"name": "V2-V", "expr": implication("V2", "V")},
         ]}
-        result = WorldJev(backend="sdd").infer(request, constraints)
+        result = DecisionFlow(backend="sdd").infer(request, constraints)
         self.assertEqual(result.inference.valid_world_count, 108)
 
     def test_toxigen_shape(self):
@@ -61,7 +61,7 @@ class PilotShapeTests(unittest.TestCase):
                 {"eq": [{"var": "toxic"}, True]},
             ]}},
         ]}
-        result = WorldJev(backend="sdd").infer(request, constraints)
+        result = DecisionFlow(backend="sdd").infer(request, constraints)
         self.assertEqual(result.inference.valid_world_count, 8)
 
     def test_goemotions_shape(self):
@@ -74,7 +74,7 @@ class PilotShapeTests(unittest.TestCase):
         constraints = {"hard": [
             {"expr": implication("neutral", name, False)} for name in emotions
         ]}
-        result = WorldJev(backend="sdd").infer(request, constraints)
+        result = DecisionFlow(backend="sdd").infer(request, constraints)
         self.assertEqual(result.inference.valid_world_count, 2 ** 27 + 1)
 
     def test_toxicchat_shape(self):
@@ -83,7 +83,7 @@ class PilotShapeTests(unittest.TestCase):
             "questions": noul_questions(["toxic", "jailbreak"]),
             "probabilities": {"toxic": 0.3, "jailbreak": 0.6},
         }
-        result = WorldJev(backend="sdd").infer(
+        result = DecisionFlow(backend="sdd").infer(
             request, {"hard": [{"expr": implication("jailbreak", "toxic")}]}
         )
         self.assertEqual(result.inference.valid_world_count, 3)
@@ -109,7 +109,7 @@ class PilotShapeTests(unittest.TestCase):
                 {"ge": [{"var": "coherence"}, 2]},
             ]}},
         ]}
-        result = WorldJev(backend="sdd").infer(request, constraints)
+        result = DecisionFlow(backend="sdd").infer(request, constraints)
         self.assertEqual(result.inference.valid_world_count, 2575)
 
 

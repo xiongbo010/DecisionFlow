@@ -1,18 +1,18 @@
 import math
 import unittest
 
-from worldjev import DecisionRequest, LocalPotentials, Question, WorldJev
-from worldjev.frontends.json import parse_program, parse_request
-from worldjev.trajectory import TrajectoryEngine, parse_trajectory
+from decisionflow import DecisionRequest, LocalPotentials, Question, DecisionFlow
+from decisionflow.frontends.json import parse_program, parse_request
+from decisionflow.trajectory import TrajectoryEngine, parse_trajectory
 
 
-class WorldJevTests(unittest.TestCase):
+class DecisionFlowTests(unittest.TestCase):
     def test_dataclass_request_accepts_json_constraints(self):
         request = DecisionRequest(
             state={},
             questions=(Question("decision", "choice", ("allow", "deny")),),
         )
-        result = WorldJev(backend="enumeration").infer(
+        result = DecisionFlow(backend="enumeration").infer(
             request,
             {"hard": [{"expr": {"eq": [{"var": "decision"}, "deny"]}}]},
             LocalPotentials({"decision": {"allow": 0.9, "deny": 0.1}}),
@@ -51,7 +51,7 @@ class WorldJevTests(unittest.TestCase):
                 },
             ]
         }
-        result = WorldJev(backend="enumeration").infer(request, constraints)
+        result = DecisionFlow(backend="enumeration").infer(request, constraints)
         self.assertGreater(result.valid_mass, 0)
         self.assertEqual(result.joint_map, {"route": "security", "fraud": True, "risk": 2})
         for marginal in result.marginals.values():
@@ -77,7 +77,7 @@ class WorldJevTests(unittest.TestCase):
                 ]},
             }]
         }
-        result = WorldJev(backend="enumeration").infer(request, constraints)
+        result = DecisionFlow(backend="enumeration").infer(request, constraints)
         self.assertAlmostEqual(result.valid_mass, 1.0)
         self.assertLess(result.diagnostics["normalizer"], 1.0)
         self.assertGreater(result.marginal("correct")[2], 0.1)
@@ -94,7 +94,7 @@ class WorldJevTests(unittest.TestCase):
         constraints = {"hard": [{"expr": {"allowed_table": {
             "variables": ["a", "b"], "rows": [["x", 0], ["y", 1]]
         }}}]}
-        result = WorldJev(backend="enumeration").infer(request, constraints)
+        result = DecisionFlow(backend="enumeration").infer(request, constraints)
         self.assertEqual(result.joint_map, {"a": "x", "b": 0})
         self.assertAlmostEqual(result.valid_mass, 0.8 * 0.3 + 0.2 * 0.7)
 
@@ -108,7 +108,7 @@ class WorldJevTests(unittest.TestCase):
             {"eq": [{"state": "account.locked"}, True]},
             {"eq": [{"var": "action"}, "unlock"]},
         ]}}]}
-        result = WorldJev().infer(request, constraints)
+        result = DecisionFlow().infer(request, constraints)
         self.assertEqual(result.joint_map["action"], "unlock")
         self.assertAlmostEqual(result.valid_mass, 0.2)
 

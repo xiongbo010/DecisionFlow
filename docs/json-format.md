@@ -1,4 +1,4 @@
-# WorldJev v0.0 JSON format
+# DecisionFlow v0.0 JSON format
 
 ## Typed decision request
 
@@ -71,7 +71,7 @@ When a scorer adapter is configured, the `probabilities` field is omitted.
 
 The table expression allows an ontology reasoner, SOP compiler, workflow
 engine, or external policy system to pass any grounded finite relation without
-adding a dependency to WorldJev core.
+adding a dependency to DecisionFlow core.
 
 Hard constraints remove assignments. A soft constraint multiplies the weight
 of each violating assignment by `exp(-penalty)`. Results report hard valid mass
@@ -102,12 +102,12 @@ trajectory mass, first-action marginals, and trajectory MAP.
 
 ## Tool registration
 
-`WorldJevTools.schemas` exposes provider-neutral JSON Schemas for three tools:
+`DecisionFlowTools.schemas` exposes provider-neutral JSON Schemas for three tools:
 
-- `worldjev_infer(request, constraints)`;
-- `worldjev_evaluate(requests, constraints)`;
-- `worldjev_trajectory(spec)`.
+- `decisionflow_infer(request, constraints)`;
+- `decisionflow_evaluate(requests, constraints)`;
+- `decisionflow_trajectory(spec)`.
 
-Create `WorldJevTools` with a `WorldJev` instance whose scorer is already
+Create `DecisionFlowTools` with a `DecisionFlow` instance whose scorer is already
 configured. This keeps model credentials and SDK objects outside tool
-arguments while allowing an agent runtime to call WorldJev with ordinary JSON.
+arguments while allowing an agent runtime to call DecisionFlow with ordinary JSON.

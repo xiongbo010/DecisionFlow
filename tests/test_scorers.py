@@ -1,7 +1,7 @@
 import unittest
 
-from worldjev.frontends.json import parse_request
-from worldjev.scorers import TypedResponseScorer
+from decisionflow.frontends.json import parse_request
+from decisionflow.scorers import TypedResponseScorer
 
 
 class ScorerTests(unittest.TestCase):

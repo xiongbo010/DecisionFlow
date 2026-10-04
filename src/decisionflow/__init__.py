@@ -1,6 +1,6 @@
-"""WorldJev public API."""
+"""DecisionFlow public API."""
 
-from .engine import WorldJev
+from .engine import DecisionFlow
 from .core import (
     Constraint,
     DecisionProgram,
@@ -14,9 +14,9 @@ from .errors import (
     ConstraintSyntaxError,
     InvalidProbabilityError,
     UnsatisfiableError,
-    WorldJevError,
+    DecisionFlowError,
 )
-from .tools import WorldJevTools
+from .tools import DecisionFlowTools
 
 __all__ = [
     "BackendUnavailableError",
@@ -29,9 +29,9 @@ __all__ = [
     "LocalPotentials",
     "Question",
     "UnsatisfiableError",
-    "WorldJev",
-    "WorldJevError",
-    "WorldJevTools",
+    "DecisionFlow",
+    "DecisionFlowError",
+    "DecisionFlowTools",
 ]
 
 __version__ = "0.0.0"

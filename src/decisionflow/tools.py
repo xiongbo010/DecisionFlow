@@ -1,6 +1,6 @@
 """JSON-in/JSON-out functions suitable for agent tool registration.
 
-Providers differ in how tools are registered, so WorldJev exposes plain Python
+Providers differ in how tools are registered, so DecisionFlow exposes plain Python
 callables plus provider-neutral JSON Schemas. Applications keep ownership of
 the configured scorer, credentials, transport, and lifecycle.
 """
@@ -9,12 +9,12 @@ from __future__ import annotations
 
 from typing import Any, Dict, Mapping, Optional, Sequence
 
-from .engine import WorldJev
+from .engine import DecisionFlow
 from .trajectory import TrajectoryEngine, parse_trajectory
 
 
 INFER_TOOL_SCHEMA = {
-    "name": "worldjev_infer",
+    "name": "decisionflow_infer",
     "description": (
         "Condition typed decision probabilities on declarative constraints and "
         "return exact marginals, joint MAP, and consistency mass."
@@ -28,7 +28,7 @@ INFER_TOOL_SCHEMA = {
             },
             "constraints": {
                 "type": ["object", "array", "null"],
-                "description": "WorldJev JSON hard and soft constraint pack.",
+                "description": "DecisionFlow JSON hard and soft constraint pack.",
             },
         },
         "required": ["request"],
@@ -37,8 +37,8 @@ INFER_TOOL_SCHEMA = {
 }
 
 EVALUATE_TOOL_SCHEMA = {
-    "name": "worldjev_evaluate",
-    "description": "Run WorldJev inference over a batch of typed decision requests.",
+    "name": "decisionflow_evaluate",
+    "description": "Run DecisionFlow inference over a batch of typed decision requests.",
     "input_schema": {
         "type": "object",
         "properties": {
@@ -51,7 +51,7 @@ EVALUATE_TOOL_SCHEMA = {
 }
 
 TRAJECTORY_TOOL_SCHEMA = {
-    "name": "worldjev_trajectory",
+    "name": "decisionflow_trajectory",
     "description": (
         "Run exact finite-horizon inference over an action policy and stochastic transitions."
     ),
@@ -64,23 +64,23 @@ TRAJECTORY_TOOL_SCHEMA = {
 }
 
 
-class WorldJevTools:
-    """Bind a configured WorldJev engine to serializable tool functions."""
+class DecisionFlowTools:
+    """Bind a configured DecisionFlow engine to serializable tool functions."""
 
     schemas = (INFER_TOOL_SCHEMA, EVALUATE_TOOL_SCHEMA, TRAJECTORY_TOOL_SCHEMA)
 
-    def __init__(self, engine: Optional[WorldJev] = None):
-        self.engine = engine or WorldJev()
+    def __init__(self, engine: Optional[DecisionFlow] = None):
+        self.engine = engine or DecisionFlow()
         self.trajectory_engine = TrajectoryEngine()
 
-    def worldjev_infer(
+    def decisionflow_infer(
         self,
         request: Mapping[str, Any],
         constraints: Any = None,
     ) -> Dict[str, Any]:
         return self.engine.infer(request, constraints).to_dict()
 
-    def worldjev_evaluate(
+    def decisionflow_evaluate(
         self,
         requests: Sequence[Mapping[str, Any]],
         constraints: Any = None,
@@ -107,16 +107,16 @@ class WorldJevTools:
             "results": rows,
         }
 
-    def worldjev_trajectory(self, spec: Mapping[str, Any]) -> Dict[str, Any]:
+    def decisionflow_trajectory(self, spec: Mapping[str, Any]) -> Dict[str, Any]:
         return self.trajectory_engine.infer(parse_trajectory(spec)).to_dict()
 
     def call(self, name: str, arguments: Mapping[str, Any]) -> Dict[str, Any]:
         """Dispatch a provider tool call by its registered name."""
         handlers = {
-            "worldjev_infer": self.worldjev_infer,
-            "worldjev_evaluate": self.worldjev_evaluate,
-            "worldjev_trajectory": self.worldjev_trajectory,
+            "decisionflow_infer": self.decisionflow_infer,
+            "decisionflow_evaluate": self.decisionflow_evaluate,
+            "decisionflow_trajectory": self.decisionflow_trajectory,
         }
         if name not in handlers:
-            raise KeyError("unknown WorldJev tool: %s" % name)
+            raise KeyError("unknown DecisionFlow tool: %s" % name)
         return handlers[name](**arguments)

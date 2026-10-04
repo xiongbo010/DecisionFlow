@@ -18,8 +18,8 @@ from .joints import IndependentJoint, JointBuilder
 from .scorers.base import Scorer
 
 
-class WorldJev:
-    """Reusable façade for scoring, grounding, and structured inference."""
+class DecisionFlow:
+    """Model and query joint distributions over structured decision flows."""
 
     def __init__(
         self,

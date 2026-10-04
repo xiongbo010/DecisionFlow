@@ -28,5 +28,5 @@ class AutoBackend:
         except ImportError as error:
             raise BackendUnavailableError(
                 "%d worlds exceed the enumeration limit and PySDD is unavailable; "
-                "install worldjev[sdd] or select a custom backend" % worlds
+                "install decisionflow[sdd] or select a custom backend" % worlds
             ) from error

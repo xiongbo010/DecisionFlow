@@ -1,23 +1,23 @@
-class WorldJevError(Exception):
-    """Base class for WorldJev errors."""
+class DecisionFlowError(Exception):
+    """Base class for DecisionFlow errors."""
 
 
-class ConstraintSyntaxError(WorldJevError):
+class ConstraintSyntaxError(DecisionFlowError):
     """A declarative constraint cannot be parsed or typed."""
 
 
-class InvalidProbabilityError(WorldJevError):
+class InvalidProbabilityError(DecisionFlowError):
     """A scorer returned a missing, negative, or zero-mass distribution."""
 
 
-class UnsatisfiableError(WorldJevError):
+class UnsatisfiableError(DecisionFlowError):
     """No positive-mass assignment satisfies the grounded model."""
 
 
-class BackendUnavailableError(WorldJevError):
+class BackendUnavailableError(DecisionFlowError):
     """An optional inference backend is unavailable."""
 
 
-class StatePathError(WorldJevError):
+class StatePathError(DecisionFlowError):
     """A constraint references a state path that cannot be resolved."""
 

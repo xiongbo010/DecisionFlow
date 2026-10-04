@@ -1,7 +1,7 @@
 import importlib.util
 import unittest
 
-from worldjev import WorldJev
+from decisionflow import DecisionFlow
 
 
 @unittest.skipUnless(importlib.util.find_spec("pysdd"), "PySDD is optional")
@@ -34,8 +34,8 @@ class SDDTests(unittest.TestCase):
                 {"eq": [{"var": "toxic"}, True]},
             ]}}],
         }
-        enum = WorldJev(backend="enumeration").infer(request, constraints)
-        sdd = WorldJev(backend="sdd").infer(request, constraints)
+        enum = DecisionFlow(backend="enumeration").infer(request, constraints)
+        sdd = DecisionFlow(backend="sdd").infer(request, constraints)
         self.assertAlmostEqual(enum.valid_mass, sdd.valid_mass, places=12)
         self.assertAlmostEqual(enum.diagnostics["normalizer"], sdd.diagnostics["normalizer"], places=12)
         self.assertEqual(enum.joint_map, sdd.joint_map)
@@ -55,7 +55,7 @@ class SDDTests(unittest.TestCase):
                 {"eq": [{"var": "neutral"}, True]},
                 {"eq": [{"var": name}, False]},
             ]}})
-        result = WorldJev(backend="sdd").infer(
+        result = DecisionFlow(backend="sdd").infer(
             {"state": {}, "questions": questions, "probabilities": probabilities},
             {"hard": hard},
         )
@@ -64,7 +64,7 @@ class SDDTests(unittest.TestCase):
         self.assertGreater(result.valid_mass, 0)
 
     def test_compilation_cache_ignores_unreferenced_state(self):
-        engine = WorldJev(backend="sdd")
+        engine = DecisionFlow(backend="sdd")
         constraints = {"hard": [{"expr": {"implies": [
             {"eq": [{"var": "a"}, True]},
             {"eq": [{"var": "b"}, True]},

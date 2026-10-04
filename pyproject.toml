@@ -3,13 +3,13 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "worldjev"
+name = "decisionflow"
 version = "0.0.0"
-description = "Model-agnostic structured probabilistic inference for typed decisions"
+description = "Joint probabilistic inference over typed decisions and multi-step trajectories"
 readme = "README.md"
 requires-python = ">=3.9"
 license = {text = "Apache-2.0"}
-authors = [{name = "WorldJev contributors"}]
+authors = [{name = "DecisionFlow contributors"}]
 dependencies = []
 
 [project.optional-dependencies]
@@ -18,7 +18,7 @@ dev = ["pytest>=7", "pytest-cov>=4"]
 all = ["PySDD>=1.0.0"]
 
 [project.scripts]
-worldjev = "worldjev.cli:main"
+decisionflow = "decisionflow.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
@@ -29,4 +29,3 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
-

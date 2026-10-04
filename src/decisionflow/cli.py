@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 from typing import Any, Mapping
 
-from .engine import WorldJev
+from .engine import DecisionFlow
 from .scorers.callable import CallableScorer
 from .trajectory import TrajectoryEngine, parse_trajectory
 
@@ -32,7 +32,7 @@ def _scorer(spec: str):
 
 
 def _engine(args):
-    return WorldJev(
+    return DecisionFlow(
         scorer=_scorer(args.scorer) if getattr(args, "scorer", None) else None,
         backend=args.backend,
         enumeration_limit=args.enumeration_limit,
@@ -92,7 +92,7 @@ def _common(parser):
 
 
 def build_parser():
-    parser = argparse.ArgumentParser(prog="worldjev")
+    parser = argparse.ArgumentParser(prog="decisionflow")
     subcommands = parser.add_subparsers(dest="command", required=True)
     infer = subcommands.add_parser("infer", help="infer one typed decision request")
     infer.add_argument("request")

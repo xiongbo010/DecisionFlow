@@ -6,7 +6,7 @@ from ..core import DecisionProgram
 
 
 class ConstraintFrontend(Protocol):
-    """Lower an external decision/constraint representation to WorldJev IR."""
+    """Lower an external decision/constraint representation to DecisionFlow IR."""
 
     name: str
 

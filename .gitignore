@@ -9,7 +9,7 @@ htmlcov/
 dist/
 build/
 
-# Research workspace material kept outside the reusable WorldJev package.
+# Research workspace material kept outside the reusable DecisionFlow package.
 .codex-finalizer/
 figures/
 imgs/

@@ -1,4 +1,4 @@
-from worldjev import WorldJevTools
+from decisionflow import DecisionFlowTools
 
 
 def request(identifier="one"):
@@ -11,9 +11,9 @@ def request(identifier="one"):
 
 
 def test_tool_dispatch_and_batch():
-    tools = WorldJevTools()
-    single = tools.call("worldjev_infer", {"request": request()})
-    batch = tools.call("worldjev_evaluate", {"requests": [request("a"), request("b")]})
+    tools = DecisionFlowTools()
+    single = tools.call("decisionflow_infer", {"request": request()})
+    batch = tools.call("decisionflow_evaluate", {"requests": [request("a"), request("b")]})
 
     assert single["joint_map"] == {"action": "b"}
     assert len(tools.schemas) == 3
@@ -22,7 +22,7 @@ def test_tool_dispatch_and_batch():
 
 
 def test_trajectory_tool():
-    result = WorldJevTools().worldjev_trajectory(
+    result = DecisionFlowTools().decisionflow_trajectory(
         {
             "initial_state": "start",
             "actions": ["inspect", "finish"],

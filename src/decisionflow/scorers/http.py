@@ -32,7 +32,7 @@ class HttpJsonScorer:
     ``response_parser`` maps the decoded response to ``{question: {value: p}}``.
     By default the adapter accepts a top-level ``probabilities`` object or the
     object itself. Authentication headers are supplied by the caller and are
-    never stored in WorldJev artifacts.
+    never stored in DecisionFlow artifacts.
     """
 
     def __init__(

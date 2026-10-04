@@ -1,20 +1,25 @@
-# WorldJev v0.0
+# DecisionFlow v0.0
 
-WorldJev turns local probability distributions from typed decision models into
-a normalized distribution over consistent decision assignments. It separates
-constraint frontends from inference backends and works with hosted APIs, local
-models, Python callables, or precomputed probabilities.
+DecisionFlow models the probability of an entire decision flow. It combines
+local probabilities from typed decision models into a normalized joint over
+multiple decisions or multi-step trajectories, optionally conditioned on hard
+and soft constraints. From the same distribution it computes marginals, joint
+MAP assignments, trajectory probabilities, and consistency mass.
+
+The model layer is provider-neutral: it works with hosted APIs, local models,
+Python callables, or precomputed probabilities. Constraint frontends and
+inference backends remain independently extensible.
 
 The v0.0 pipeline is:
 
 ```text
-typed request ──> scorer adapter ──> local probabilities
+state + typed questions ──> scorer adapter ──> local probabilities
       │                                      │
 JSON constraints ──> JSON frontend ──> decision program
                                              │
-                         enumeration / SDD backend
+                    joint model ──> enumeration / SDD
                                              │
-                       marginals · joint MAP · valid mass Z
+              marginals · joint MAP · trajectories · valid mass Z
 ```
 
 ```bash
@@ -23,7 +28,7 @@ pip install -e '.[sdd]'   # optional scalable SDD backend
 ```
 
 ```python
-from worldjev import WorldJev
+from decisionflow import DecisionFlow
 
 request = {
     "state": {"channel": "card"},
@@ -46,7 +51,7 @@ constraints = {
     }]
 }
 
-result = WorldJev(backend="auto").infer(request, constraints)
+result = DecisionFlow(backend="auto").infer(request, constraints)
 print(result.marginals)
 print(result.joint_map)
 print(result.valid_mass)
@@ -59,8 +64,8 @@ later requests with the same grounded structure.
 
 ## Model adapters
 
-WorldJev does not import a particular model SDK. Configure one of these
-provider-neutral adapters and pass it to `WorldJev(scorer=...)`:
+DecisionFlow does not import a particular model SDK. Configure one of these
+provider-neutral adapters and pass it to `DecisionFlow(scorer=...)`:
 
 - `PrecomputedScorer` for cached experiment outputs;
 - `CallableScorer` for a local Python model;
@@ -74,26 +79,26 @@ without provider code in the inference core.
 ## Agent tool calls
 
 ```python
-from worldjev import WorldJev, WorldJevTools
-from worldjev.scorers import TypedResponseScorer
+from decisionflow import DecisionFlow, DecisionFlowTools
+from decisionflow.scorers import TypedResponseScorer
 
 scorer = TypedResponseScorer(call_your_model_sdk)
-tools = WorldJevTools(WorldJev(scorer=scorer, backend="auto"))
+tools = DecisionFlowTools(DecisionFlow(scorer=scorer, backend="auto"))
 
 # Register tools.schemas with the agent provider, then dispatch its tool call:
 output = tools.call(tool_name, tool_arguments)
 ```
 
-The registered tools are `worldjev_infer`, `worldjev_evaluate`, and
-`worldjev_trajectory`. Their inputs and outputs contain only JSON-compatible
+The registered tools are `decisionflow_infer`, `decisionflow_evaluate`, and
+`decisionflow_trajectory`. Their inputs and outputs contain only JSON-compatible
 objects.
 
 The JSON CLI accepts one request or JSONL batches:
 
 ```bash
-worldjev infer request.json --constraints policy.json
-worldjev evaluate requests.jsonl --constraints policy.json --output results.jsonl
-worldjev trajectory trajectory.json
+decisionflow infer request.json --constraints policy.json
+decisionflow evaluate requests.jsonl --constraints policy.json --output results.jsonl
+decisionflow trajectory trajectory.json
 ```
 
 See `docs/json-format.md` for the v0.0 interchange format.
@@ -135,6 +140,6 @@ library contains no dataset-specific branches or label names.
 - Multi-step inference uses an explicit finite state graph and separates action
   probabilities from stochastic environment transitions.
 - Ontologies, SOPs, and policy languages require an external grounding step to
-  WorldJev JSON expressions or finite tables.
+  DecisionFlow JSON expressions or finite tables.
 - The cache is process-local; persistent circuit artifacts and a network
   service are reserved interfaces for later releases.

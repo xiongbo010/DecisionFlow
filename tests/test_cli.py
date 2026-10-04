@@ -1,6 +1,6 @@
 import json
 
-from worldjev.cli import main
+from decisionflow.cli import main
 
 
 def _request(identifier="case-1"):
