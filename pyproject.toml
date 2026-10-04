@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "worldjev"
+version = "0.0.0"
+description = "Model-agnostic structured probabilistic inference for typed decisions"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "Apache-2.0"}
+authors = [{name = "WorldJev contributors"}]
+dependencies = []
+
+[project.optional-dependencies]
+sdd = ["PySDD>=1.0.0"]
+dev = ["pytest>=7", "pytest-cov>=4"]
+all = ["PySDD>=1.0.0"]
+
+[project.scripts]
+worldjev = "worldjev.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+

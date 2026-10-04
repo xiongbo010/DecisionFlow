@@ -1,0 +1,25 @@
+{
+  "name": "ticket-policy",
+  "version": "1.0",
+  "hard": [
+    {
+      "name": "fraud-route",
+      "expr": {
+        "implies": [
+          {"eq": [{"var": "fraud"}, true]},
+          {"in": [{"var": "route"}, ["security", "fraud"]]}
+        ]
+      }
+    },
+    {
+      "name": "high-urgency-not-billing",
+      "expr": {
+        "implies": [
+          {"eq": [{"var": "urgency"}, "high"]},
+          {"ne": [{"var": "route"}, "billing"]}
+        ]
+      }
+    }
+  ]
+}
+

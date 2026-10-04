@@ -1,0 +1,23 @@
+{
+  "initial_state": "powered_high_open",
+  "actions": ["isolate", "bleed", "clamp", "power", "pump", "accept"],
+  "horizon": 6,
+  "terminal_states": ["accepted"],
+  "policy": {
+    "powered_high_open": {"isolate": 0.2, "bleed": 0.5, "clamp": 0.1, "power": 0.05, "pump": 0.1, "accept": 0.05},
+    "isolated_high_open": {"isolate": 0.05, "bleed": 0.7, "clamp": 0.1, "power": 0.05, "pump": 0.05, "accept": 0.05},
+    "isolated_zero_open": {"isolate": 0.05, "bleed": 0.1, "clamp": 0.65, "power": 0.1, "pump": 0.05, "accept": 0.05},
+    "isolated_zero_clamped": {"isolate": 0.05, "bleed": 0.05, "clamp": 0.1, "power": 0.65, "pump": 0.1, "accept": 0.05},
+    "powered_zero_clamped": {"isolate": 0.05, "bleed": 0.05, "clamp": 0.05, "power": 0.1, "pump": 0.7, "accept": 0.05},
+    "powered_target_clamped": {"isolate": 0.05, "bleed": 0.05, "clamp": 0.05, "power": 0.05, "pump": 0.1, "accept": 0.7}
+  },
+  "transitions": {
+    "powered_high_open": {"isolate": "isolated_high_open"},
+    "isolated_high_open": {"bleed": "isolated_zero_open", "power": "powered_high_open"},
+    "isolated_zero_open": {"clamp": "isolated_zero_clamped", "power": "powered_high_open"},
+    "isolated_zero_clamped": {"power": "powered_zero_clamped"},
+    "powered_zero_clamped": {"pump": "powered_target_clamped", "isolate": "isolated_zero_clamped"},
+    "powered_target_clamped": {"accept": "accepted", "isolate": "isolated_zero_clamped"}
+  }
+}
+

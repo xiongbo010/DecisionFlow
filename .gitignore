@@ -1,0 +1,21 @@
+.venv-openjev/
+__pycache__/
+*.py[cod]
+.DS_Store
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
+
+# Research workspace material kept outside the reusable WorldJev package.
+.codex-finalizer/
+figures/
+imgs/
+openjev_local/
+output/
+pilot/
+third_party/
+tmp/
+problem_approach.tex

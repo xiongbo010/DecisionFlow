@@ -1,0 +1,16 @@
+{
+  "state": {
+    "text": "Unknown-device login and a repeated credit-card charge."
+  },
+  "questions": [
+    {"id": "route", "type": "choice", "options": ["billing", "security", "fraud"]},
+    {"id": "fraud", "type": "noul"},
+    {"id": "urgency", "type": "score", "options": ["low", "medium", "high"]}
+  ],
+  "probabilities": {
+    "route": {"billing": 0.46, "security": 0.34, "fraud": 0.20},
+    "fraud": {"false": 0.55, "true": 0.45},
+    "urgency": {"low": 0.10, "medium": 0.25, "high": 0.65}
+  }
+}
+
