@@ -65,9 +65,12 @@
     </g>
     <text x="164" y="301" text-anchor="middle" class="label">Shared Input</text>
     <path d="M73 353h25 M73 362h25 M73 371h25" stroke="#07164f" stroke-width="3" stroke-linecap="round"/>
-    <text x="112" y="369" class="small">State x</text>
+    <text x="112" y="369" font-size="22" font-weight="650">State x</text>
     <path d="M75 408c0-9 9-16 20-16s20 7 20 16-9 16-20 16c-3 0-6 0-9-1l-10 7 3-12c-3-3-4-6-4-10z" fill="none" stroke="#07164f" stroke-width="2.6"/>
-    <text x="124" y="415" font-size="18" font-weight="600">Typed Questions Q</text>
+    <text x="124" y="407" font-size="20" font-weight="650">
+      <tspan x="124" dy="0">Typed</tspan>
+      <tspan x="124" dy="23">Questions Q</tspan>
+    </text>
 
     <!-- Left arrows -->
     <path d="M277 327 C305 327 298 208 330 208" fill="none" stroke="#1685f4" stroke-width="6" stroke-linecap="round" marker-end="url(#arrowBlue)"/>
@@ -115,9 +118,12 @@
     </g>
     <text x="1060" y="302" text-anchor="middle" class="label">Shared Input</text>
     <path d="M972 355h25 M972 364h25 M972 373h25" stroke="#07164f" stroke-width="3" stroke-linecap="round"/>
-    <text x="1012" y="371" class="small">State x</text>
+    <text x="1012" y="371" font-size="22" font-weight="650">State x</text>
     <path d="M974 410c0-9 9-16 20-16s20 7 20 16-9 16-20 16c-3 0-6 0-9-1l-10 7 3-12c-3-3-4-6-4-10z" fill="none" stroke="#07164f" stroke-width="2.6"/>
-    <text x="1020" y="417" font-size="18" font-weight="600">Typed Questions Q</text>
+    <text x="1020" y="409" font-size="20" font-weight="650">
+      <tspan x="1020" dy="0">Typed</tspan>
+      <tspan x="1020" dy="23">Questions Q</tspan>
+    </text>
 
     <!-- Right input arrows -->
     <path d="M1170 325 C1190 325 1190 280 1215 280" fill="none" stroke="#1685f4" stroke-width="6" stroke-linecap="round" marker-end="url(#arrowBlue)"/>
@@ -177,13 +183,15 @@
     <!-- Legend -->
     <rect x="955" y="520" width="792" height="118" rx="20" fill="#ffffff" stroke="#d7e8fa" stroke-width="1.5"/>
     <path d="M978 570 C1000 548 1028 592 1053 570" fill="none" stroke="#6ab3f6" stroke-width="23" opacity=".55"/>
-    <text x="1070" y="558" font-size="18" font-weight="700">Ribbon width:</text><text x="1070" y="582" font-size="18" font-weight="600">joint probability</text>
+    <text x="1070" y="557" font-size="20" font-weight="700">Ribbon width:</text><text x="1070" y="584" font-size="20" font-weight="600">joint probability</text>
     <path d="M1240 540V618" stroke="#c9ddf5" stroke-width="2"/>
     <circle cx="1295" cy="578" r="25" fill="#e5f2ff" stroke="#80bcf6" stroke-width="6"/><circle cx="1295" cy="578" r="17" fill="#1685f4"/>
-    <text x="1335" y="558" font-size="18" font-weight="700">Node size:</text><text x="1335" y="582" font-size="18" font-weight="600">marginal probability</text>
+    <text x="1335" y="557" font-size="20" font-weight="700">Node size:</text><text x="1335" y="584" font-size="20" font-weight="600">marginal probability</text>
     <path d="M1518 540V618" stroke="#c9ddf5" stroke-width="2"/>
     <path d="M1548 578h63" stroke="#1685f4" stroke-width="14" marker-end="url(#arrowNavy)"/>
-    <text x="1640" y="558" font-size="18" font-weight="700">Highlighted path:</text><text x="1640" y="582" font-size="18" font-weight="600">Joint MAP</text>
+    <text x="1620" y="548" font-size="20" font-weight="700">Highlighted</text>
+    <text x="1620" y="572" font-size="20" font-weight="600">path:</text>
+    <text x="1620" y="596" font-size="20" font-weight="700">Joint MAP</text>
 
     <text x="450" y="724" text-anchor="middle" class="caption">Probabilistic distributions of individual decisions</text>
     <text x="1350" y="724" text-anchor="middle" class="caption">Probabilistic distributions of complete possible decision flows</text>
