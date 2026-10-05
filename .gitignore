@@ -15,7 +15,14 @@ figures/
 imgs/
 openjev_local/
 output/
+# Legacy exploratory scripts and local artifacts. Maintained only as a local
+# provenance source while the tracked, API-based reproduction package lives in
+# experiments/.
 pilot/
+experiments/.venv/
+experiments/data/
+experiments/artifacts/
+experiments/results/generated/
 third_party/
 tmp/
 problem_approach.tex

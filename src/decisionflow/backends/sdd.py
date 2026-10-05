@@ -396,6 +396,14 @@ class SDDBackend:
             for item in program.hard_constraints
             if not item.expr.evaluate(raw_map, program.request.state)
         ]
+        marginal_map = {
+            name: max(row, key=row.get) for name, row in marginals.items()
+        }
+        marginal_violations = [
+            item.name
+            for item in program.hard_constraints
+            if not item.expr.evaluate(marginal_map, program.request.state)
+        ]
         nodes = None
         elements = None
         try:
@@ -429,6 +437,8 @@ class SDDBackend:
                 "hard_valid_mass": hard_z,
                 "raw_local_map": raw_map,
                 "raw_local_map_violations": violations,
+                "marginal_map": marginal_map,
+                "marginal_map_violations": marginal_violations,
                 "hard_constraints": [item.name for item in program.hard_constraints],
                 "soft_constraints": [item.name for item in program.soft_constraints],
                 "compile_cache_hit": cache_hit,

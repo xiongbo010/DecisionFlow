@@ -19,6 +19,38 @@ class DecisionFlowTests(unittest.TestCase):
         )
         self.assertEqual(result.joint_map["decision"], "deny")
 
+    def test_compile_and_infer_program_public_boundary(self):
+        engine = DecisionFlow(backend="enumeration")
+        request = {
+            "state": {},
+            "questions": [{"id": "decision", "type": "choice", "options": ["a", "b"]}],
+        }
+        program = engine.compile(
+            request,
+            {"hard": [{"expr": {"eq": [{"var": "decision"}, "b"]}}]},
+        )
+        result = engine.infer_program(
+            program,
+            LocalPotentials({"decision": {"a": 0.9, "b": 0.1}}),
+        )
+        self.assertEqual(result.joint_map["decision"], "b")
+
+    def test_infer_many_streams_prepared_programs(self):
+        engine = DecisionFlow(backend="enumeration")
+        request = DecisionRequest(
+            state={}, questions=(Question("decision", "choice", ("a", "b")),)
+        )
+        program = engine.compile(request)
+        rows = list(
+            engine.infer_many(
+                [
+                    (program, LocalPotentials({"decision": {"a": 0.8, "b": 0.2}})),
+                    (program, LocalPotentials({"decision": {"a": 0.1, "b": 0.9}})),
+                ]
+            )
+        )
+        self.assertEqual([row.joint_map["decision"] for row in rows], ["a", "b"])
+
     def test_mixed_typed_hard_constraints(self):
         request = {
             "state": {},

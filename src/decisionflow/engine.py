@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Mapping, Optional, Union
+from typing import Any, Iterable, Mapping, Optional, Tuple, Union
 
 from .backends.auto import AutoBackend
 from .backends.enumeration import EnumerationBackend
@@ -45,12 +45,17 @@ class DecisionFlow:
         else:
             self.backend = backend
 
-    def infer(
+    def compile(
         self,
         request: Union[DecisionRequest, Mapping[str, Any]],
         constraints: Any = None,
-        potentials: Optional[LocalPotentials] = None,
-    ) -> DecisionResult:
+    ) -> DecisionProgram:
+        """Compile a typed request and constraints without invoking a scorer.
+
+        This is the stable boundary for applications that prepare model scores
+        and decision programs in separate stages.  Dataset loading, prompting,
+        and benchmark-specific transformations belong to the caller.
+        """
         if isinstance(request, DecisionRequest):
             if constraints is None:
                 compiled_constraints = ()
@@ -61,11 +66,26 @@ class DecisionFlow:
                 compiled_constraints = parse_constraints(constraints)
             else:
                 compiled_constraints = tuple(constraints)
-            program = DecisionProgram(request=request, constraints=compiled_constraints)
-            request_payload = None
-        else:
-            request_payload = request
-            program = self.frontend.compile(request, constraints)
+            return DecisionProgram(request=request, constraints=compiled_constraints)
+        return self.frontend.compile(request, constraints)
+
+    def infer_program(
+        self,
+        program: DecisionProgram,
+        potentials: LocalPotentials,
+    ) -> DecisionResult:
+        """Infer from an already compiled program and supplied local scores."""
+        normalized = potentials.normalized_for(program.request)
+        return self.backend.infer(program, normalized, self.joint)
+
+    def infer(
+        self,
+        request: Union[DecisionRequest, Mapping[str, Any]],
+        constraints: Any = None,
+        potentials: Optional[LocalPotentials] = None,
+    ) -> DecisionResult:
+        request_payload = request if isinstance(request, Mapping) else None
+        program = self.compile(request, constraints)
         if potentials is None:
             if self.scorer is not None:
                 potentials = self.scorer.score(program.request)
@@ -73,5 +93,18 @@ class DecisionFlow:
                 potentials = parse_probabilities(request_payload, program.request)
             else:
                 raise ValueError("provide a scorer or LocalPotentials")
-        potentials = potentials.normalized_for(program.request)
-        return self.backend.infer(program, potentials, self.joint)
+        return self.infer_program(program, potentials)
+
+    def infer_many(
+        self,
+        items: Iterable[Tuple[DecisionProgram, LocalPotentials]],
+    ) -> Iterable[DecisionResult]:
+        """Infer a stream of prepared programs without imposing storage policy.
+
+        The iterable API lets research code stream large cached score files
+        while the backend reuses compiled structures when their schemas match.
+        Errors intentionally propagate so the caller controls experiment-level
+        retry and accounting semantics.
+        """
+        for program, potentials in items:
+            yield self.infer_program(program, potentials)

@@ -85,6 +85,14 @@ class EnumerationBackend:
         for row in marginals.values():
             for value in row:
                 row[value] /= normalizer
+        marginal_map = {
+            name: max(row, key=row.get) for name, row in marginals.items()
+        }
+        marginal_violations = [
+            constraint.name
+            for constraint in program.hard_constraints
+            if not constraint.expr.evaluate(marginal_map, request.state)
+        ]
         elapsed = 1000.0 * (time.perf_counter() - started)
         return DecisionResult(
             marginals=marginals,
@@ -105,6 +113,8 @@ class EnumerationBackend:
                 "joint_builder": getattr(joint, "name", type(joint).__name__),
                 "raw_local_map": raw_map,
                 "raw_local_map_violations": raw_violations,
+                "marginal_map": marginal_map,
+                "marginal_map_violations": marginal_violations,
                 "hard_constraints": [item.name for item in program.hard_constraints],
                 "soft_constraints": [item.name for item in program.soft_constraints],
                 "normalizer": normalizer,

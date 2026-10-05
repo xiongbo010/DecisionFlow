@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "decisionflow-experiments"
+version = "0.0.0"
+description = "Paper experiments and reproducibility code for DecisionFlow"
+requires-python = ">=3.9"
+dependencies = ["decisionflow[sdd]>=0.0.0"]
+
+[project.optional-dependencies]
+data = ["numpy>=1.24", "pandas>=2", "pyarrow>=14"]
+dev = ["pytest>=7"]
+
+[project.scripts]
+decisionflow-experiments = "decisionflow_experiments.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

@@ -130,8 +130,17 @@ pilots:
 | SOP-Bench | finite SOP relations, state evidence, and multi-step policies |
 | JevAny control panel | finite-horizon action/transition constraints |
 
-Dataset acquisition, prompting, and benchmark metrics stay in `pilot/`; the
-library contains no dataset-specific branches or label names.
+Dataset acquisition, prompting, benchmark metrics, and paper tables live in
+the separate [`experiments/`](experiments/) package. That package depends on
+DecisionFlow and calls only its public API; DecisionFlow never imports it. The
+library therefore contains no dataset-specific branches, labels, prompts, or
+paper-reproduction commands. Local legacy pilots remain ignored provenance
+material while their score-generation paths are migrated.
+
+This separation also applies to command-line interfaces:
+
+- `decisionflow infer|evaluate|trajectory` is the reusable product CLI;
+- `decisionflow-experiments verify|run` belongs to the research package.
 
 ## v0.0 boundaries
 

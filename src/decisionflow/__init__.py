@@ -17,6 +17,13 @@ from .errors import (
     DecisionFlowError,
 )
 from .tools import DecisionFlowTools
+from .trajectory import (
+    TrajectoryEngine,
+    TrajectoryResult,
+    TrajectorySpec,
+    Transition,
+    parse_trajectory,
+)
 
 __all__ = [
     "BackendUnavailableError",
@@ -32,6 +39,11 @@ __all__ = [
     "DecisionFlow",
     "DecisionFlowError",
     "DecisionFlowTools",
+    "TrajectoryEngine",
+    "TrajectoryResult",
+    "TrajectorySpec",
+    "Transition",
+    "parse_trajectory",
 ]
 
 __version__ = "0.0.0"
