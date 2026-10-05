@@ -95,5 +95,21 @@ Multi-step experiments provide a `trajectory` object accepted by
 `decisionflow.TrajectoryEngine`.
 
 Legacy exploratory scripts and locally downloaded data remain in the ignored
-`pilot/` directory until each score-generation pipeline is audited and migrated.
-They are provenance material, not part of the public reproduction contract.
+`pilot/` artifacts and data directories. The pilot Python sources are tracked
+as the reference definitions of data loading, label handling, full metrics,
+bootstrap intervals, and audits. The `full` runner replaces their inference
+functions with DecisionFlow public-API calls and writes complete JSON results:
+
+```bash
+decisionflow-experiments full --experiment all --repo-root .
+```
+
+Generated JSON files are written under
+`experiments/results/generated/full/`. LaTeX table generation is intentionally
+outside this pipeline.
+
+The full runner currently expects the locally acquired inputs documented in
+`pilot/README.md`: the released Jev response SQLite cache, the moderation JSONL
+archive, and the four public parquet datasets under `tmp/`. These inputs remain
+outside Git because of size and upstream licensing; their paths are resolved by
+the runner and missing inputs fail explicitly.

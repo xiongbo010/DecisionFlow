@@ -22,7 +22,10 @@ jobs:
           cache: pip
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -e '.[sdd,dev]'
-      - run: python -m pip install -e './experiments[dev]'
+      - if: matrix.python-version != '3.9'
+        run: python -m pip install -e './experiments[dev]'
       - run: python -m pytest
-      - run: python -m pytest experiments/tests
-      - run: decisionflow-experiments verify --backend auto
+      - if: matrix.python-version != '3.9'
+        run: python -m pytest experiments/tests
+      - if: matrix.python-version != '3.9'
+        run: decisionflow-experiments verify --backend auto

@@ -15,10 +15,16 @@ figures/
 imgs/
 openjev_local/
 output/
-# Legacy exploratory scripts and local artifacts. Maintained only as a local
-# provenance source while the tracked, API-based reproduction package lives in
-# experiments/.
-pilot/
+# The legacy pilot source remains tracked as the reference definition of
+# dataset loading and metrics. Local dependencies, data, circuits, and outputs
+# remain excluded; the API-based orchestration lives in experiments/.
+pilot/*
+!pilot/README.md
+!pilot/*.py
+!pilot/requirements-sdd.txt
+pilot/.deps/
+pilot/artifacts/
+pilot/results/
 experiments/.venv/
 experiments/data/
 experiments/artifacts/

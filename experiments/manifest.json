@@ -3,12 +3,12 @@
   "purpose": "Maps reported experiment families to reproducibility assets.",
   "canonical_path": "cached_scores",
   "experiments": {
-    "openai_moderation": {"mode": "fixed", "status": "schema-ready", "source": "Zenodo response cache"},
-    "toxigen": {"mode": "fixed", "status": "schema-ready", "source": "Hugging Face dataset plus response cache"},
-    "goemotions": {"mode": "fixed", "status": "schema-ready", "source": "Hugging Face dataset plus response cache"},
-    "toxicchat": {"mode": "fixed", "status": "schema-ready", "source": "Hugging Face dataset plus response cache"},
-    "helpsteer2": {"mode": "fixed", "status": "schema-ready", "source": "Hugging Face dataset plus response cache"},
-    "helpsteer2_soft": {"mode": "fixed", "status": "schema-ready", "source": "Frozen train-estimated soft penalties"},
+    "openai_moderation": {"mode": "fixed", "status": "full-metrics-ready", "source": "Zenodo response cache"},
+    "toxigen": {"mode": "fixed", "status": "full-metrics-ready", "source": "Hugging Face dataset plus response cache"},
+    "goemotions": {"mode": "fixed", "status": "full-metrics-ready", "source": "Hugging Face dataset plus response cache"},
+    "toxicchat": {"mode": "fixed", "status": "full-metrics-ready", "source": "Hugging Face dataset plus response cache"},
+    "helpsteer2": {"mode": "fixed", "status": "full-metrics-ready", "source": "Hugging Face dataset plus response cache"},
+    "helpsteer2_soft": {"mode": "fixed", "status": "full-metrics-ready", "source": "Frozen train-estimated soft penalties"},
     "typed_decisions": {"mode": "grounded", "status": "adapter-ready", "source": "LocalLLaMA/typed-decisions and pinned model scores"},
     "sop_bench": {"mode": "grounded", "status": "adapter-ready", "source": "amazon-science/SOP-Bench and pinned model scores"},
     "multistep": {"mode": "trajectory", "status": "library-api-ready", "source": "grounded transition and policy records"}

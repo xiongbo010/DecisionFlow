@@ -1,0 +1,4 @@
+numpy
+pandas
+pyarrow==21.0.0
+PySDD==1.0.6

@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "decisionflow-experiments"
 version = "0.0.0"
 description = "Paper experiments and reproducibility code for DecisionFlow"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = ["decisionflow[sdd]>=0.0.0"]
 
 [project.optional-dependencies]

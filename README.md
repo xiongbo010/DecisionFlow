@@ -142,6 +142,17 @@ This separation also applies to command-line interfaces:
 - `decisionflow infer|evaluate|trajectory` is the reusable product CLI;
 - `decisionflow-experiments verify|run` belongs to the research package.
 
+With the released datasets and Jev response cache placed under `tmp/`, the
+research package regenerates the complete JSON metric reports for all five
+single-step pilots through the public DecisionFlow API:
+
+```bash
+decisionflow-experiments full --experiment all --repo-root .
+```
+
+See `experiments/README.md` for inputs, output paths, and the boundary between
+cached-score evaluation and model-score regeneration.
+
 ## v0.0 boundaries
 
 - All candidate domains are finite.

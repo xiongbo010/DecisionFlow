@@ -14,6 +14,15 @@ from .runner import ExperimentRunner, TrajectoryExperimentRunner
 from .metrics import summarize
 
 
+FULL_PILOTS = (
+    "openai_moderation",
+    "toxigen",
+    "goemotions",
+    "toxicchat",
+    "helpsteer2",
+)
+
+
 def _open(path: str, mode: str):
     if path == "-":
         return sys.stdin if "r" in mode else sys.stdout
@@ -93,6 +102,23 @@ def command_trajectory(args) -> None:
             target.close()
 
 
+def command_full(args) -> None:
+    from .full import write_full
+
+    root = Path(args.repo_root).resolve()
+    names = FULL_PILOTS if args.experiment == "all" else (args.experiment,)
+    output_dir = Path(args.output_dir)
+    if not output_dir.is_absolute():
+        output_dir = root / output_dir
+    completed = []
+    for name in names:
+        output = output_dir / (name + ".json")
+        result = write_full(root, name, output)
+        completed.append({"experiment": name, "output": str(output), "keys": list(result)})
+    json.dump({"completed": completed}, sys.stdout, indent=2)
+    sys.stdout.write("\n")
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="decisionflow-experiments")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -115,6 +141,13 @@ def build_parser() -> argparse.ArgumentParser:
     trajectory.add_argument("--input", required=True)
     trajectory.add_argument("--output", default="-")
     trajectory.set_defaults(handler=command_trajectory)
+    full = commands.add_parser(
+        "full", help="reproduce complete pilot metrics through DecisionFlow"
+    )
+    full.add_argument("--experiment", choices=("all", *FULL_PILOTS), default="all")
+    full.add_argument("--repo-root", default=".")
+    full.add_argument("--output-dir", default="experiments/results/generated/full")
+    full.set_defaults(handler=command_full)
     return parser
 
 
