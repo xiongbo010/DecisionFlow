@@ -17,7 +17,10 @@
 </p>
 
 <p align="center">
-  <img src="assets/decisionflow-demo.gif" width="1026" alt="DecisionFlow compiles decision models and declarative structure into a coherent decision distribution" />
+  <picture>
+    <source srcset="assets/decisionflow-demo-hd.webp" type="image/webp" />
+    <img src="assets/decisionflow-demo.gif" width="1026" alt="DecisionFlow compiles decision models and declarative structure into a coherent decision distribution" />
+  </picture>
 </p>
 
 DecisionFlow compiles declarative business workflows and decision policies into
