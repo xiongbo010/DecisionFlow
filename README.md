@@ -47,9 +47,14 @@ API or the workflow representation.
 ## Install
 
 ```bash
-pip install -e .
-pip install -e '.[sdd]'   # probabilistic-circuit backend
+pip install "decisionflow @ git+ssh://git@github.com/xiongbo010/DecisionFlow.git@v0.1.0"
+pip install "decisionflow[sdd] @ git+ssh://git@github.com/xiongbo010/DecisionFlow.git@v0.1.0"
 ```
+
+The repository is currently private, so installation from Git requires GitHub
+access. A downloaded release wheel can also be installed with
+`pip install decisionflow-0.1.0-py3-none-any.whl`. For local development, clone
+the repository and run `pip install -e '.[dev]'`.
 
 ## Declarative workflow
 
