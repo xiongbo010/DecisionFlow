@@ -11,6 +11,10 @@ dependencies = ["decisionflow[sdd]>=0.0.0"]
 
 [project.optional-dependencies]
 data = ["numpy>=1.24", "pandas>=2", "pyarrow>=14"]
+gliner25 = ["datasets>=4,<5", "gliner2>=2,<3"]
+logistics = ["laya>=0.3.27,<0.4", "transformers>=4.48", "torch>=2"]
+trex = ["mlx-lm>=0.31"]
+fleetflow = ["jevany>=0.3,<0.4"]
 dev = ["pytest>=7"]
 
 [project.scripts]

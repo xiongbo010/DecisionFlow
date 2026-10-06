@@ -1,7 +1,8 @@
 import math
 import unittest
 
-from decisionflow import DecisionRequest, LocalPotentials, Question, DecisionFlow
+from decisionflow.core import DecisionRequest, LocalPotentials, Question
+from decisionflow.engine import DecisionEngine
 from decisionflow.frontends.json import parse_program, parse_request
 from decisionflow.trajectory import TrajectoryEngine, parse_trajectory
 
@@ -12,7 +13,7 @@ class DecisionFlowTests(unittest.TestCase):
             state={},
             questions=(Question("decision", "choice", ("allow", "deny")),),
         )
-        result = DecisionFlow(backend="enumeration").infer(
+        result = DecisionEngine(backend="enumeration").infer(
             request,
             {"hard": [{"expr": {"eq": [{"var": "decision"}, "deny"]}}]},
             LocalPotentials({"decision": {"allow": 0.9, "deny": 0.1}}),
@@ -20,7 +21,7 @@ class DecisionFlowTests(unittest.TestCase):
         self.assertEqual(result.joint_map["decision"], "deny")
 
     def test_compile_and_infer_program_public_boundary(self):
-        engine = DecisionFlow(backend="enumeration")
+        engine = DecisionEngine(backend="enumeration")
         request = {
             "state": {},
             "questions": [{"id": "decision", "type": "choice", "options": ["a", "b"]}],
@@ -36,7 +37,7 @@ class DecisionFlowTests(unittest.TestCase):
         self.assertEqual(result.joint_map["decision"], "b")
 
     def test_infer_many_streams_prepared_programs(self):
-        engine = DecisionFlow(backend="enumeration")
+        engine = DecisionEngine(backend="enumeration")
         request = DecisionRequest(
             state={}, questions=(Question("decision", "choice", ("a", "b")),)
         )
@@ -69,23 +70,29 @@ class DecisionFlowTests(unittest.TestCase):
             "hard": [
                 {
                     "name": "fraud-security",
-                    "expr": {"implies": [
-                        {"eq": [{"var": "fraud"}, True]},
-                        {"eq": [{"var": "route"}, "security"]},
-                    ]},
+                    "expr": {
+                        "implies": [
+                            {"eq": [{"var": "fraud"}, True]},
+                            {"eq": [{"var": "route"}, "security"]},
+                        ]
+                    },
                 },
                 {
                     "name": "high-risk-fraud",
-                    "expr": {"implies": [
-                        {"eq": [{"var": "risk"}, 2]},
-                        {"eq": [{"var": "fraud"}, True]},
-                    ]},
+                    "expr": {
+                        "implies": [
+                            {"eq": [{"var": "risk"}, 2]},
+                            {"eq": [{"var": "fraud"}, True]},
+                        ]
+                    },
                 },
             ]
         }
-        result = DecisionFlow(backend="enumeration").infer(request, constraints)
+        result = DecisionEngine(backend="enumeration").infer(request, constraints)
         self.assertGreater(result.valid_mass, 0)
-        self.assertEqual(result.joint_map, {"route": "security", "fraud": True, "risk": 2})
+        self.assertEqual(
+            result.joint_map, {"route": "security", "fraud": True, "risk": 2}
+        )
         for marginal in result.marginals.values():
             self.assertAlmostEqual(sum(marginal.values()), 1.0)
         self.assertTrue(result.inference.exact)
@@ -100,16 +107,20 @@ class DecisionFlowTests(unittest.TestCase):
             "probabilities": {"help": [0.1, 0.2, 0.7], "correct": [0.6, 0.3, 0.1]},
         }
         constraints = {
-            "soft": [{
-                "name": "high-help-prefers-correct",
-                "penalty": 2.0,
-                "expr": {"implies": [
-                    {"eq": [{"var": "help"}, 2]},
-                    {"eq": [{"var": "correct"}, 2]},
-                ]},
-            }]
+            "soft": [
+                {
+                    "name": "high-help-prefers-correct",
+                    "penalty": 2.0,
+                    "expr": {
+                        "implies": [
+                            {"eq": [{"var": "help"}, 2]},
+                            {"eq": [{"var": "correct"}, 2]},
+                        ]
+                    },
+                }
+            ]
         }
-        result = DecisionFlow(backend="enumeration").infer(request, constraints)
+        result = DecisionEngine(backend="enumeration").infer(request, constraints)
         self.assertAlmostEqual(result.valid_mass, 1.0)
         self.assertLess(result.diagnostics["normalizer"], 1.0)
         self.assertGreater(result.marginal("correct")[2], 0.1)
@@ -123,24 +134,43 @@ class DecisionFlowTests(unittest.TestCase):
             ],
             "probabilities": {"a": [0.8, 0.2], "b": [0.3, 0.7]},
         }
-        constraints = {"hard": [{"expr": {"allowed_table": {
-            "variables": ["a", "b"], "rows": [["x", 0], ["y", 1]]
-        }}}]}
-        result = DecisionFlow(backend="enumeration").infer(request, constraints)
+        constraints = {
+            "hard": [
+                {
+                    "expr": {
+                        "allowed_table": {
+                            "variables": ["a", "b"],
+                            "rows": [["x", 0], ["y", 1]],
+                        }
+                    }
+                }
+            ]
+        }
+        result = DecisionEngine(backend="enumeration").infer(request, constraints)
         self.assertEqual(result.joint_map, {"a": "x", "b": 0})
         self.assertAlmostEqual(result.valid_mass, 0.8 * 0.3 + 0.2 * 0.7)
 
     def test_state_grounding(self):
         request = {
             "state": {"account": {"locked": True}},
-            "questions": [{"id": "action", "type": "choice", "options": ["unlock", "ignore"]}],
+            "questions": [
+                {"id": "action", "type": "choice", "options": ["unlock", "ignore"]}
+            ],
             "probabilities": {"action": [0.2, 0.8]},
         }
-        constraints = {"hard": [{"expr": {"implies": [
-            {"eq": [{"state": "account.locked"}, True]},
-            {"eq": [{"var": "action"}, "unlock"]},
-        ]}}]}
-        result = DecisionFlow().infer(request, constraints)
+        constraints = {
+            "hard": [
+                {
+                    "expr": {
+                        "implies": [
+                            {"eq": [{"state": "account.locked"}, True]},
+                            {"eq": [{"var": "action"}, "unlock"]},
+                        ]
+                    }
+                }
+            ]
+        }
+        result = DecisionEngine().infer(request, constraints)
         self.assertEqual(result.joint_map["action"], "unlock")
         self.assertAlmostEqual(result.valid_mass, 0.2)
 

@@ -5,11 +5,10 @@ import importlib
 import json
 import sys
 from pathlib import Path
-from typing import Any, Mapping
 
-from .engine import DecisionFlow
+from .api import DecisionFlow
 from .scorers.callable import CallableScorer
-from .trajectory import TrajectoryEngine, parse_trajectory
+from .workflows.inference import create_flow_backend_registry
 
 
 def _load_json(path: str):
@@ -19,10 +18,10 @@ def _load_json(path: str):
         return json.load(stream)
 
 
-def _scorer(spec: str):
+def _model(spec: str):
     module_name, separator, attribute = spec.partition(":")
     if not separator:
-        raise ValueError("scorer must use module:attribute syntax")
+        raise ValueError("model must use module:attribute syntax")
     target = getattr(importlib.import_module(module_name), attribute)
     if isinstance(target, type):
         target = target()
@@ -31,81 +30,59 @@ def _scorer(spec: str):
     return CallableScorer(target)
 
 
-def _engine(args):
-    return DecisionFlow(
-        scorer=_scorer(args.scorer) if getattr(args, "scorer", None) else None,
+def _backend_options(value):
+    if not value:
+        return None
+    path = Path(value)
+    if path.exists():
+        return _load_json(value)
+    parsed = json.loads(value)
+    if not isinstance(parsed, dict):
+        raise ValueError("backend options must be a JSON object")
+    return parsed
+
+
+def command_run(args):
+    flow = DecisionFlow.from_file(
+        workflow=args.workflow,
+        model=_model(args.model),
+        policies=args.policies,
         backend=args.backend,
-        enumeration_limit=args.enumeration_limit,
+        backend_options=_backend_options(args.backend_options),
+        max_worlds=args.max_worlds,
     )
-
-
-def _constraints(args):
-    return _load_json(args.constraints) if args.constraints else None
-
-
-def command_infer(args):
-    result = _engine(args).infer(_load_json(args.request), _constraints(args))
+    result = flow.infer(_load_json(args.state))
     json.dump(result.to_dict(), sys.stdout, indent=2, default=str)
     sys.stdout.write("\n")
 
 
-def command_evaluate(args):
-    engine = _engine(args)
-    constraints = _constraints(args)
-    source = sys.stdin if args.input == "-" else Path(args.input).open(encoding="utf-8")
-    target = sys.stdout if args.output == "-" else Path(args.output).open("w", encoding="utf-8")
-    try:
-        for line_number, line in enumerate(source, start=1):
-            if not line.strip():
-                continue
-            record = json.loads(line)
-            try:
-                result = engine.infer(record, constraints)
-                output = {"id": record.get("id", line_number), "status": "ok", **result.to_dict()}
-            except Exception as error:
-                output = {
-                    "id": record.get("id", line_number),
-                    "status": "error",
-                    "error": type(error).__name__,
-                    "message": str(error),
-                }
-            target.write(json.dumps(output, default=str) + "\n")
-            target.flush()
-    finally:
-        if source is not sys.stdin:
-            source.close()
-        if target is not sys.stdout:
-            target.close()
-
-
-def command_trajectory(args):
-    result = TrajectoryEngine().infer(parse_trajectory(_load_json(args.spec)))
-    json.dump(result.to_dict(), sys.stdout, indent=2)
+def command_backends(args):
+    payload = {
+        name: descriptor.to_dict()
+        for name, descriptor in create_flow_backend_registry().describe().items()
+    }
+    json.dump(payload, sys.stdout, indent=2)
     sys.stdout.write("\n")
-
-
-def _common(parser):
-    parser.add_argument("--constraints")
-    parser.add_argument("--scorer", help="Python plugin as module:attribute")
-    parser.add_argument("--backend", choices=("auto", "enumeration", "sdd"), default="auto")
-    parser.add_argument("--enumeration-limit", type=int, default=100_000)
 
 
 def build_parser():
     parser = argparse.ArgumentParser(prog="decisionflow")
     subcommands = parser.add_subparsers(dest="command", required=True)
-    infer = subcommands.add_parser("infer", help="infer one typed decision request")
-    infer.add_argument("request")
-    _common(infer)
-    infer.set_defaults(handler=command_infer)
-    evaluate = subcommands.add_parser("evaluate", help="evaluate JSONL requests")
-    evaluate.add_argument("input")
-    evaluate.add_argument("--output", default="-")
-    _common(evaluate)
-    evaluate.set_defaults(handler=command_evaluate)
-    trajectory = subcommands.add_parser("trajectory", help="infer a finite trajectory model")
-    trajectory.add_argument("spec")
-    trajectory.set_defaults(handler=command_trajectory)
+    run = subcommands.add_parser(
+        "run", help="compile and infer a declarative decision workflow"
+    )
+    run.add_argument("workflow", help="JSON or YAML workflow file")
+    run.add_argument("state", help="JSON state file, or - for stdin")
+    run.add_argument("--model", required=True, help="model plugin as module:attribute")
+    run.add_argument("--policies", help="optional JSON or YAML policy file")
+    run.add_argument("--backend", default="auto")
+    run.add_argument("--backend-options")
+    run.add_argument("--max-worlds", type=int, default=100_000)
+    run.set_defaults(handler=command_run)
+    backends = subcommands.add_parser(
+        "backends", help="list structured-flow inference methods"
+    )
+    backends.set_defaults(handler=command_backends)
     return parser
 
 
@@ -116,4 +93,3 @@ def main(argv=None):
 
 if __name__ == "__main__":
     main()
-

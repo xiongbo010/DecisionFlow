@@ -11,17 +11,25 @@ from .enumeration import EnumerationBackend
 class AutoBackend:
     name = "auto"
     exact = True
+    capabilities = ("valid_mass", "marginals", "joint_map")
 
     def __init__(self, enumeration_limit: int = 100_000):
         self.enumeration_limit = enumeration_limit
         self._sdd = None
 
-    def infer(self, program: DecisionProgram, potentials: LocalPotentials, joint: JointBuilder):
-        worlds = math.prod(len(question.options) for question in program.request.questions)
+    def infer(
+        self, program: DecisionProgram, potentials: LocalPotentials, joint: JointBuilder
+    ):
+        worlds = math.prod(
+            len(question.options) for question in program.request.questions
+        )
         if worlds <= self.enumeration_limit:
-            return EnumerationBackend(self.enumeration_limit).infer(program, potentials, joint)
+            return EnumerationBackend(self.enumeration_limit).infer(
+                program, potentials, joint
+            )
         try:
             from .sdd import SDDBackend
+
             if self._sdd is None:
                 self._sdd = SDDBackend()
             return self._sdd.infer(program, potentials, joint)

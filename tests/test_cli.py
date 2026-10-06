@@ -1,75 +1,41 @@
 import json
+import sys
+import types
 
 from decisionflow.cli import main
 
-
-def _request(identifier="case-1"):
-    return {
-        "id": identifier,
-        "state": {"channel": "card"},
-        "questions": [
-            {"id": "route", "type": "choice", "options": ["billing", "security"]},
-            {"id": "fraud", "type": "noul"},
-        ],
-        "probabilities": {
-            "route": {"billing": 0.7, "security": 0.3},
-            "fraud": 0.8,
-        },
-    }
+from workflow_fixtures import decision_model, workflow_document
 
 
-def _constraints():
-    return {
-        "hard": [
-            {
-                "name": "fraud-routes-security",
-                "expr": {
-                    "implies": [
-                        {"eq": [{"var": "fraud"}, True]},
-                        {"eq": [{"var": "route"}, "security"]},
-                    ]
-                },
-            }
-        ]
-    }
-
-
-def test_cli_infer(tmp_path, capsys):
-    request_path = tmp_path / "request.json"
-    constraints_path = tmp_path / "constraints.json"
-    request_path.write_text(json.dumps(_request()), encoding="utf-8")
-    constraints_path.write_text(json.dumps(_constraints()), encoding="utf-8")
-
-    main(["infer", str(request_path), "--constraints", str(constraints_path)])
-    output = json.loads(capsys.readouterr().out)
-
-    assert output["inference"]["exact"] is True
-    assert output["joint_map"] == {"route": "security", "fraud": True}
-    assert output["valid_mass"] > 0
-
-
-def test_cli_jsonl_evaluation(tmp_path):
-    input_path = tmp_path / "requests.jsonl"
-    output_path = tmp_path / "results.jsonl"
-    constraints_path = tmp_path / "constraints.json"
-    input_path.write_text(
-        "\n".join(json.dumps(_request("case-%d" % index)) for index in range(2)) + "\n",
-        encoding="utf-8",
-    )
-    constraints_path.write_text(json.dumps(_constraints()), encoding="utf-8")
+def test_cli_run(tmp_path, capsys, monkeypatch):
+    workflow_path = tmp_path / "workflow.json"
+    state_path = tmp_path / "state.json"
+    workflow_path.write_text(json.dumps(workflow_document()), encoding="utf-8")
+    state_path.write_text(json.dumps({"status": "open"}), encoding="utf-8")
+    plugin = types.ModuleType("decisionflow_test_model")
+    plugin.model = decision_model
+    monkeypatch.setitem(sys.modules, "decisionflow_test_model", plugin)
 
     main(
         [
-            "evaluate",
-            str(input_path),
-            "--constraints",
-            str(constraints_path),
-            "--output",
-            str(output_path),
+            "run",
+            str(workflow_path),
+            str(state_path),
+            "--model",
+            "decisionflow_test_model:model",
+            "--backend",
+            "enumeration",
         ]
     )
-    rows = [json.loads(line) for line in output_path.read_text(encoding="utf-8").splitlines()]
+    output = json.loads(capsys.readouterr().out)
 
-    assert [row["id"] for row in rows] == ["case-0", "case-1"]
-    assert all(row["status"] == "ok" for row in rows)
-    assert all("marginals" in row and "joint_map" in row for row in rows)
+    assert output["prediction_kind"] == "joint_map"
+    assert output["inference"]["exact"] is True
+
+
+def test_cli_lists_workflow_backends(capsys):
+    main(["backends"])
+    output = json.loads(capsys.readouterr().out)
+
+    assert "enumeration" in output
+    assert "greedy" in output

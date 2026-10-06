@@ -20,4 +20,3 @@ class BackendUnavailableError(DecisionFlowError):
 
 class StatePathError(DecisionFlowError):
     """A constraint references a state path that cannot be resolved."""
-

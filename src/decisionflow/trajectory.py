@@ -8,12 +8,10 @@ outcomes.
 
 from __future__ import annotations
 
-import functools
-import time
 from dataclasses import dataclass, field
-from typing import Any, Dict, Mapping, Tuple
+from typing import Any, Mapping, Optional, Tuple, Union
 
-from .errors import UnsatisfiableError
+from .backends.registry import BackendRegistry
 
 
 @dataclass(frozen=True)
@@ -35,17 +33,30 @@ class TrajectorySpec:
 
 @dataclass(frozen=True)
 class TrajectoryResult:
-    valid_mass: float
+    valid_mass: Optional[float]
     first_action_marginals: Mapping[str, float]
     trajectory_map: Tuple[Tuple[str, str], ...]
-    map_probability: float
+    map_probability: Optional[float]
     states_visited: int
     edges_evaluated: int
     inference_ms: float
     exact: bool = True
+    backend: str = "dynamic_programming"
+    prediction_kind: str = "trajectory_map"
+    capabilities: Tuple[str, ...] = (
+        "valid_mass",
+        "first_action_marginals",
+        "joint_map",
+    )
+    diagnostics: Mapping[str, Any] = field(default_factory=dict)
+
+    def supports(self, query: str) -> bool:
+        return query in self.capabilities
 
     def to_dict(self):
         return {
+            "prediction": [list(item) for item in self.trajectory_map],
+            "prediction_kind": self.prediction_kind,
             "valid_mass": self.valid_mass,
             "first_action_marginals": dict(self.first_action_marginals),
             "trajectory_map": [list(item) for item in self.trajectory_map],
@@ -54,87 +65,55 @@ class TrajectoryResult:
             "edges_evaluated": self.edges_evaluated,
             "inference_ms": self.inference_ms,
             "exact": self.exact,
+            "backend": self.backend,
+            "capabilities": list(self.capabilities),
+            "diagnostics": dict(self.diagnostics),
         }
 
 
 class TrajectoryEngine:
-    """Exact finite-horizon sum/max-product over an explicit state graph."""
+    """Select and run a pluggable inference method over a trajectory model."""
 
-    def infer(self, spec: TrajectorySpec) -> TrajectoryResult:
+    def __init__(
+        self,
+        backend: Union[str, Any] = "dynamic_programming",
+        *,
+        backend_options: Optional[Mapping[str, Any]] = None,
+        backend_registry: Optional[BackendRegistry] = None,
+    ) -> None:
+        from .trajectory_backends import create_trajectory_backend_registry
+
+        self.backend_registry = backend_registry or create_trajectory_backend_registry()
+        self.backend_options = dict(backend_options or {})
+        self.backend = self._resolve_backend(backend, self.backend_options)
+
+    def _resolve_backend(
+        self,
+        backend: Union[str, Any],
+        options: Optional[Mapping[str, Any]] = None,
+    ) -> Any:
+        if isinstance(backend, str):
+            return self.backend_registry.create(backend, **dict(options or {}))
+        return backend
+
+    def available_backends(self) -> Mapping[str, Any]:
+        return self.backend_registry.describe()
+
+    def infer(
+        self,
+        spec: TrajectorySpec,
+        *,
+        backend: Optional[Union[str, Any]] = None,
+        backend_options: Optional[Mapping[str, Any]] = None,
+    ) -> TrajectoryResult:
         if spec.horizon < 0:
             raise ValueError("horizon must be non-negative")
-        terminals = set(spec.terminal_states)
-        visited = set()
-        edges = set()
-
-        def policy(state: str) -> Dict[str, float]:
-            source = spec.policy.get(state, {})
-            row = {action: max(0.0, float(source.get(action, 0.0))) for action in spec.actions}
-            total = sum(row.values())
-            if total <= 0:
-                return row
-            return {action: value / total for action, value in row.items()}
-
-        @functools.lru_cache(maxsize=None)
-        def solve(state: str, remaining: int):
-            visited.add((state, remaining))
-            if state in terminals:
-                return 1.0, 1.0, (), 1
-            if remaining == 0:
-                return 0.0, 0.0, (), 0
-            local = policy(state)
-            total = 0.0
-            best = 0.0
-            best_path = ()
-            count = 0
-            for action in spec.actions:
-                action_probability = local[action]
-                if action_probability <= 0:
-                    continue
-                outcomes = spec.transitions.get(state, {}).get(action, ())
-                outcome_total = sum(max(0.0, item.probability) for item in outcomes)
-                if outcome_total <= 0:
-                    continue
-                for outcome in outcomes:
-                    transition_probability = max(0.0, outcome.probability) / outcome_total
-                    edges.add((state, remaining, action, outcome.next_state))
-                    child_z, child_best, child_path, child_count = solve(
-                        outcome.next_state, remaining - 1
-                    )
-                    branch = action_probability * transition_probability
-                    total += branch * child_z
-                    count += child_count
-                    candidate = branch * child_best
-                    if candidate > best:
-                        best = candidate
-                        best_path = ((action, outcome.next_state),) + child_path
-            return total, best, best_path, count
-
-        started = time.perf_counter()
-        z, best, best_path, _ = solve(spec.initial_state, spec.horizon)
-        if z <= 0:
-            raise UnsatisfiableError("no terminal trajectory has positive probability")
-        first_mass = {action: 0.0 for action in spec.actions}
-        local = policy(spec.initial_state)
-        for action in spec.actions:
-            outcomes = spec.transitions.get(spec.initial_state, {}).get(action, ())
-            total = sum(max(0.0, item.probability) for item in outcomes)
-            if total <= 0:
-                continue
-            for outcome in outcomes:
-                transition_probability = max(0.0, outcome.probability) / total
-                child_z = solve(outcome.next_state, spec.horizon - 1)[0]
-                first_mass[action] += local[action] * transition_probability * child_z
-        elapsed = 1000.0 * (time.perf_counter() - started)
-        return TrajectoryResult(
-            valid_mass=z,
-            first_action_marginals={action: value / z for action, value in first_mass.items()},
-            trajectory_map=best_path,
-            map_probability=best / z,
-            states_visited=len(visited),
-            edges_evaluated=len(edges),
-            inference_ms=elapsed,
+        selected = (
+            self.backend
+            if backend is None
+            else self._resolve_backend(backend, backend_options)
         )
+        return selected.infer(spec)
 
 
 def parse_trajectory(payload: Mapping[str, Any]) -> TrajectorySpec:

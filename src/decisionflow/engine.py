@@ -4,8 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Iterable, Mapping, Optional, Tuple, Union
 
-from .backends.auto import AutoBackend
-from .backends.enumeration import EnumerationBackend
+from .backends import BackendRegistry, create_backend_registry
 from .core import (
     Constraint,
     DecisionProgram,
@@ -18,8 +17,8 @@ from .joints import IndependentJoint, JointBuilder
 from .scorers.base import Scorer
 
 
-class DecisionFlow:
-    """Model and query joint distributions over structured decision flows."""
+class DecisionEngine:
+    """Low-level inference over an already grounded typed decision program."""
 
     def __init__(
         self,
@@ -28,22 +27,35 @@ class DecisionFlow:
         joint: Optional[JointBuilder] = None,
         frontend: Optional[Any] = None,
         enumeration_limit: int = 100_000,
+        backend_options: Optional[Mapping[str, Any]] = None,
+        backend_registry: Optional[BackendRegistry] = None,
     ):
         self.scorer = scorer
         self.joint = joint or IndependentJoint()
         self.frontend = frontend or JsonFrontend()
-        if backend == "auto":
-            self.backend = AutoBackend(enumeration_limit)
-        elif backend == "enumeration":
-            self.backend = EnumerationBackend(enumeration_limit)
-        elif backend == "sdd":
-            from .backends.sdd import SDDBackend
+        self.enumeration_limit = enumeration_limit
+        self.backend_registry = backend_registry or create_backend_registry()
+        self.backend_options = dict(backend_options or {})
+        self.backend = self._resolve_backend(backend, self.backend_options)
 
-            self.backend = SDDBackend()
-        elif isinstance(backend, str):
-            raise ValueError("unknown backend: %s" % backend)
-        else:
-            self.backend = backend
+    def _resolve_backend(
+        self,
+        backend: Union[str, Any],
+        options: Optional[Mapping[str, Any]] = None,
+    ) -> Any:
+        if not isinstance(backend, str):
+            return backend
+        configured = dict(options or {})
+        canonical = self.backend_registry.descriptor(backend).name
+        if canonical == "auto":
+            configured.setdefault("enumeration_limit", self.enumeration_limit)
+        elif canonical == "enumeration":
+            configured.setdefault("max_worlds", self.enumeration_limit)
+        return self.backend_registry.create(backend, **configured)
+
+    def available_backends(self) -> Mapping[str, Any]:
+        """Return backend capability metadata without importing optional engines."""
+        return self.backend_registry.describe()
 
     def compile(
         self,
@@ -73,16 +85,25 @@ class DecisionFlow:
         self,
         program: DecisionProgram,
         potentials: LocalPotentials,
+        backend: Optional[Union[str, Any]] = None,
+        backend_options: Optional[Mapping[str, Any]] = None,
     ) -> DecisionResult:
         """Infer from an already compiled program and supplied local scores."""
         normalized = potentials.normalized_for(program.request)
-        return self.backend.infer(program, normalized, self.joint)
+        selected = (
+            self.backend
+            if backend is None
+            else self._resolve_backend(backend, backend_options)
+        )
+        return selected.infer(program, normalized, self.joint)
 
     def infer(
         self,
         request: Union[DecisionRequest, Mapping[str, Any]],
         constraints: Any = None,
         potentials: Optional[LocalPotentials] = None,
+        backend: Optional[Union[str, Any]] = None,
+        backend_options: Optional[Mapping[str, Any]] = None,
     ) -> DecisionResult:
         request_payload = request if isinstance(request, Mapping) else None
         program = self.compile(request, constraints)
@@ -93,7 +114,12 @@ class DecisionFlow:
                 potentials = parse_probabilities(request_payload, program.request)
             else:
                 raise ValueError("provide a scorer or LocalPotentials")
-        return self.infer_program(program, potentials)
+        return self.infer_program(
+            program,
+            potentials,
+            backend=backend,
+            backend_options=backend_options,
+        )
 
     def infer_many(
         self,

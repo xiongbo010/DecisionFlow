@@ -15,6 +15,7 @@ from ..joints import JointBuilder
 class EnumerationBackend:
     name = "enumeration"
     exact = True
+    capabilities = ("valid_mass", "marginals", "joint_map")
 
     def __init__(self, max_worlds: int = 1_000_000):
         self.max_worlds = max_worlds
@@ -26,7 +27,9 @@ class EnumerationBackend:
         joint: JointBuilder,
     ) -> DecisionResult:
         request = program.request
-        total_worlds = math.prod(len(question.options) for question in request.questions)
+        total_worlds = math.prod(
+            len(question.options) for question in request.questions
+        )
         if total_worlds > self.max_worlds:
             raise ValueError(
                 "enumeration needs %d worlds, above max_worlds=%d; install decisionflow[sdd]"
@@ -85,9 +88,7 @@ class EnumerationBackend:
         for row in marginals.values():
             for value in row:
                 row[value] /= normalizer
-        marginal_map = {
-            name: max(row, key=row.get) for name, row in marginals.items()
-        }
+        marginal_map = {name: max(row, key=row.get) for name, row in marginals.items()}
         marginal_violations = [
             constraint.name
             for constraint in program.hard_constraints
@@ -107,6 +108,7 @@ class EnumerationBackend:
                 inference_ms=elapsed,
                 world_count=total_worlds,
                 valid_world_count=valid_count,
+                capabilities=self.capabilities,
             ),
             diagnostics={
                 "program": {"name": program.name, "version": program.version},

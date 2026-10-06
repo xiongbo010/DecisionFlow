@@ -10,6 +10,6 @@ class ConstraintFrontend(Protocol):
 
     name: str
 
-    def compile(self, request: Mapping[str, Any], constraints: Any = None) -> DecisionProgram:
-        ...
-
+    def compile(
+        self, request: Mapping[str, Any], constraints: Any = None
+    ) -> DecisionProgram: ...

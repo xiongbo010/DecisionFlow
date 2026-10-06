@@ -18,7 +18,8 @@ from typing import Any, Dict, Mapping, Sequence
 
 import numpy as np
 
-from decisionflow import DecisionFlow, LocalPotentials
+from decisionflow.core import LocalPotentials
+from decisionflow.engine import DecisionEngine
 
 from .registry import EXPERIMENTS
 
@@ -82,7 +83,7 @@ def _infer(
     constraints: Mapping[str, Any],
     probability_rows: Sequence[Mapping[str, Mapping[Any, float]]],
 ):
-    engine = DecisionFlow(backend="sdd")
+    engine = DecisionEngine(backend="sdd")
     request = {"state": {}, "questions": list(questions)}
     program = engine.compile(request, constraints)
     started = time.perf_counter()

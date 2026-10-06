@@ -7,7 +7,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, Iterator, Mapping, Optional, TextIO
 
-from decisionflow import DecisionFlow, TrajectoryEngine, parse_trajectory
+from decisionflow.engine import DecisionEngine
+from decisionflow.trajectory import TrajectoryEngine, parse_trajectory
 from decisionflow.frontends.json import parse_probabilities
 
 from .registry import ExperimentSpec
@@ -28,11 +29,11 @@ class ExperimentRunner:
     """Run one experiment without owning data acquisition or model inference."""
 
     spec: ExperimentSpec
-    engine: DecisionFlow
+    engine: DecisionEngine
 
     @classmethod
     def create(cls, spec: ExperimentSpec, backend: str = "auto") -> "ExperimentRunner":
-        return cls(spec=spec, engine=DecisionFlow(backend=backend))
+        return cls(spec=spec, engine=DecisionEngine(backend=backend))
 
     def run_record(self, record: Mapping[str, Any]) -> Dict[str, Any]:
         request_payload = self.spec.request(record)

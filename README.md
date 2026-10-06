@@ -1,167 +1,235 @@
-# DecisionFlow v0.0
+<p align="center">
+  <img src="site/favicon.svg" width="104" alt="DecisionFlow logo" />
+</p>
 
-![DecisionFlow: from typed decisions to structured decision flows](assets/decisionflow-concept.svg)
+<h1 align="center">DecisionFlow</h1>
 
-DecisionFlow models probability over complete structured decisions. It combines
-local predictions into a joint distribution over multiple decisions or
-multi-step trajectories, where each complete assignment represents a possible
-decision world. The same model supports exact marginals, joint MAP, trajectory
-probabilities, and consistency mass under optional hard or soft constraints.
+<p align="center"><strong>Decisions that agree.</strong></p>
 
-The model layer is provider-neutral: it works with hosted APIs, local models,
-Python callables, or precomputed probabilities. Constraint frontends and
-inference backends remain independently extensible.
+<p align="center">
+  Open infrastructure for modeling complete decision flows, from local model
+  scores to coherent multi-step decisions.
+</p>
 
-The v0.0 pipeline is:
+<p align="center">
+  <a href="#install">Install</a> ·
+  <a href="#declarative-workflow">Workflow</a> ·
+  <a href="#python-api">Python API</a> ·
+  <a href="docs/inference-backends.md">Inference backends</a>
+</p>
+
+<p align="center">
+  <img src="assets/decisionflow-demo.gif" width="1026" alt="DecisionFlow compiles decision models and declarative structure into a coherent decision distribution" />
+</p>
+
+DecisionFlow compiles declarative business workflows and decision policies into
+structured probabilistic decision flows. Users choose a decision model, provide
+a JSON or YAML workflow, and select an inference backend. The compiler creates
+the typed questions, reachable branches, state transitions, and complete
+decision worlds required for joint inference.
 
 ```text
-state + typed questions ──> scorer adapter ──> local probabilities
-      │                                      │
-JSON constraints ──> JSON frontend ──> decision program
-                                             │
-                    joint model ──> enumeration / SDD
-                                             │
-              marginals · joint MAP · trajectories · valid mass Z
+initial state + declarative workflow + policies
+                         │
+decision model ──> WorkflowCompiler
+                         │
+              StructuredDecisionFlow IR
+                         │
+ greedy · A* · beam · DP · SAT · exact · PC · sampling
+                         │
+       complete flow · MAP · marginals · valid mass
 ```
+
+Probabilistic circuits are one inference backend. They do not define the public
+API or the workflow representation.
+
+## Install
 
 ```bash
 pip install -e .
-pip install -e '.[sdd]'   # optional scalable SDD backend
+pip install -e '.[sdd]'   # probabilistic-circuit backend
 ```
+
+## Declarative workflow
+
+```yaml
+name: service-ticket
+version: 1
+start: classify
+max_steps: 3
+
+steps:
+  classify:
+    questions:
+      - id: route
+        type: choice
+        instruction: Which department should handle the ticket?
+        options: [billing, security]
+      - id: fraud
+        type: noul
+        instruction: Does the ticket indicate fraud?
+    transitions:
+      - name: possible-fraud
+        when: {eq: [{var: fraud}, true]}
+        goto: review
+        set: {queue: {const: security}}
+      - name: ordinary-ticket
+        otherwise: true
+        goto: resolved
+        set: {queue: {var: route}}
+
+  review:
+    questions:
+      - id: action
+        type: choice
+        options: [freeze, dismiss]
+    transitions:
+      - otherwise: true
+        goto: resolved
+
+  resolved:
+    terminal: true
+
+constraints:
+  hard:
+    - name: fraud-routes-security
+      expr:
+        implies:
+          - {eq: [{var: classify.fraud}, true]}
+          - {eq: [{var: classify.route}, security]}
+    - name: fraud-cannot-be-dismissed
+      expr:
+        implies:
+          - {eq: [{var: classify.fraud}, true]}
+          - {eq: [{var: review.action}, freeze]}
+```
+
+The compiler namespaces generated variables by step and visit, such as
+`classify@0.route` and `review@1.action`. Stable names such as
+`classify.route` are available in policies. Variables in inactive branches use
+the explicit `__inactive__` value during marginal inference.
+
+## Python API
 
 ```python
 from decisionflow import DecisionFlow
-
-request = {
-    "state": {"channel": "card"},
-    "questions": [
-        {"id": "route", "type": "choice", "options": ["billing", "security"]},
-        {"id": "fraud", "type": "noul"},
-    ],
-    "probabilities": {
-        "route": {"billing": 0.6, "security": 0.4},
-        "fraud": {"false": 0.3, "true": 0.7},
-    },
-}
-constraints = {
-    "hard": [{
-        "name": "fraud-routes-to-security",
-        "expr": {"implies": [
-            {"eq": [{"var": "fraud"}, True]},
-            {"eq": [{"var": "route"}, "security"]}
-        ]}
-    }]
-}
-
-result = DecisionFlow(backend="auto").infer(request, constraints)
-print(result.marginals)
-print(result.joint_map)
-print(result.valid_mass)
-```
-
-`backend="auto"` uses the transparent enumeration oracle for small spaces and
-the optional SDD backend for larger spaces. The SDD backend compiles the rule
-structure once, caches it, and changes only the model-provided leaf weights on
-later requests with the same grounded structure.
-
-## Model adapters
-
-DecisionFlow does not import a particular model SDK. Configure one of these
-provider-neutral adapters and pass it to `DecisionFlow(scorer=...)`:
-
-- `PrecomputedScorer` for cached experiment outputs;
-- `CallableScorer` for a local Python model;
-- `TypedResponseScorer` for Jev-style `answers` returned by any SDK;
-- `HttpJsonScorer` for a local server or hosted endpoint.
-
-Custom scorers implement one method: `score(DecisionRequest) -> LocalPotentials`.
-This boundary supports OpenJev, JevAny, locally hosted models, and closed APIs
-without provider code in the inference core.
-
-## Agent tool calls
-
-```python
-from decisionflow import DecisionFlow, DecisionFlowTools
 from decisionflow.scorers import TypedResponseScorer
 
-scorer = TypedResponseScorer(call_your_model_sdk)
-tools = DecisionFlowTools(DecisionFlow(scorer=scorer, backend="auto"))
+model = TypedResponseScorer(call_your_model_sdk)
 
-# Register tools.schemas with the agent provider, then dispatch its tool call:
-output = tools.call(tool_name, tool_arguments)
+flow = DecisionFlow(
+    model=model,
+    workflow="service-ticket.yaml",
+    policies="company-policies.yaml",       # optional
+    backend="pc",
+)
+
+result = flow.infer({"ticket_id": "T-104", "status": "open"})
+
+print(result.flow)             # selected complete decision flow
+print(result.prediction)       # generated typed decisions
+print(result.marginals)        # when supported by the backend
+print(result.valid_mass)       # when supported by the backend
 ```
 
-The registered tools are `decisionflow_infer`, `decisionflow_evaluate`, and
-`decisionflow_trajectory`. Their inputs and outputs contain only JSON-compatible
-objects.
+The constructor is the public configuration boundary:
 
-The JSON CLI accepts one request or JSONL batches:
+```text
+DecisionFlow(model, workflow, policies, backend, backend_options, max_worlds)
+```
+
+Runtime calls supply the initial business state. A backend can also be
+overridden for one call:
+
+```python
+greedy = flow.infer(state, backend="greedy")
+sampled = flow.infer(
+    state,
+    backend="sampling",
+    backend_options={"samples": 50_000, "seed": 7},
+)
+```
+
+## Inference methods
+
+| Backend | Output | Exact |
+|---|---|---:|
+| `greedy` | local point-prediction flow and policy violations | no |
+| `a_star` / `astar` | maximum-probability feasible flow | yes |
+| `beam_search` / `beam` | finite-width approximate MAP flow | no |
+| `dynamic_programming` / `dp` | valid mass, marginals, and joint MAP | yes |
+| `sat` | an arbitrary feasible flow | yes for feasibility |
+| `enumeration` / `auto` | valid mass, marginals, and joint MAP | yes |
+| `pc` / `sdd` | valid mass, marginals, and joint MAP | yes |
+| `top_k` | truncated marginals and MAP | no |
+| `sampling` | estimated valid mass, marginals, and observed MAP | no |
+
+Each result reports its capabilities. Marginals and valid mass are optional
+outputs rather than requirements imposed on every inference method.
+
+The v0.1 A* implementation uses the admissible zero heuristic, making it an
+exact uniform-cost search under negative log-probability. SAT uses a CNF
+encoding and a dependency-free DPLL solver; it ignores model probabilities and
+answers feasibility. DP runs sum-product and max-product recursions on the
+compiled prefix DAG.
+
+The v0.1 PC backend performs an exact categorical-world SDD lowering after
+finite workflow compilation. A structural workflow-to-circuit lowering can
+replace it later without changing the workflow schema or public API.
+
+See [`docs/inference-backends.md`](docs/inference-backends.md) for backend
+contracts and extension points.
+
+## Decision models
+
+DecisionFlow remains model-provider neutral. A model implements:
+
+```python
+score(DecisionRequest) -> LocalPotentials
+```
+
+The compiler calls it only for reachable workflow nodes. Existing adapters
+support cached probabilities, Python callables, Jev-style responses, HTTP
+services, local models, and hosted APIs.
+
+## Agent tool and CLI
+
+```python
+from decisionflow import DecisionFlowTools
+
+tools = DecisionFlowTools(model=model, workflow="service-ticket.yaml")
+output = tools.call("decisionflow_run", {"state": current_ticket})
+```
+
+The provider-neutral tools are `decisionflow_run` and
+`decisionflow_backends`.
 
 ```bash
-decisionflow infer request.json --constraints policy.json
-decisionflow evaluate requests.jsonl --constraints policy.json --output results.jsonl
-decisionflow trajectory trajectory.json
+decisionflow run examples/service-ticket-workflow.yaml \
+  examples/service-ticket-state.json \
+  --model examples.service_ticket_model:model \
+  --backend pc
+
+decisionflow backends
 ```
 
-See `docs/json-format.md` for the v0.0 interchange format.
+## Core and experiments
 
-## Constraint coverage
+The reusable Core owns workflow parsing, compilation, model scoring, structured
+IR, and inference. Dataset loading, benchmark prompts, cached scores, metrics,
+and paper tables remain in [`experiments/`](experiments/). Legacy pilots use the
+internal grounded-decision engine while they are migrated to declarative
+workflow files; no dataset-specific behavior is imported by Core.
 
-The JSON frontend supports Boolean composition, implications, equivalence,
-comparisons, set membership, cardinality, hard rules, and weighted soft rules.
-An `allowed_table` or `forbidden_table` can represent any grounded finite
-relation. Consequently, a workflow engine, SOP parser, policy system, ontology
-reasoner, or temporal-rule compiler can remain outside the core and submit its
-grounded relation through the same interface.
+## v0.1 boundaries
 
-## Regression coverage
-
-Core regression tests cover every decision structure used in the current
-pilots:
-
-| Experiment family | Typed structure exercised |
-|---|---|
-| OpenAI Moderation | eight Boolean decisions and hierarchical implications |
-| ToxiGen | Boolean plus ordinal Score |
-| GoEmotions | 28 Boolean decisions and mutual exclusion |
-| ToxicChat | two Boolean decisions and implication |
-| HelpSteer2 | five ordinal Scores with hard and soft rules |
-| Typed Decisions | heterogeneous Choice, Noul, and Score requests |
-| SOP-Bench | finite SOP relations, state evidence, and multi-step policies |
-| JevAny control panel | finite-horizon action/transition constraints |
-
-Dataset acquisition, prompting, benchmark metrics, and paper tables live in
-the separate [`experiments/`](experiments/) package. That package depends on
-DecisionFlow and calls only its public API; DecisionFlow never imports it. The
-library therefore contains no dataset-specific branches, labels, prompts, or
-paper-reproduction commands. Local legacy pilots remain ignored provenance
-material while their score-generation paths are migrated.
-
-This separation also applies to command-line interfaces:
-
-- `decisionflow infer|evaluate|trajectory` is the reusable product CLI;
-- `decisionflow-experiments verify|run` belongs to the research package.
-
-With the released datasets and Jev response cache placed under `tmp/`, the
-research package regenerates the complete JSON metric reports for all five
-single-step pilots through the public DecisionFlow API:
-
-```bash
-decisionflow-experiments full --experiment all --repo-root .
-```
-
-See `experiments/README.md` for inputs, output paths, and the boundary between
-cached-score evaluation and model-score regeneration.
-
-## v0.0 boundaries
-
-- All candidate domains are finite.
-- The SDD backend currently accepts the independent local-potential joint. The
-  `JointBuilder` interface reserves directed and learned joint models; arbitrary
-  joint builders already work with the enumeration backend.
-- Multi-step inference uses an explicit finite state graph and separates action
-  probabilities from stochastic environment transitions.
-- Ontologies, SOPs, and policy languages require an external grounding step to
-  DecisionFlow JSON expressions or finite tables.
-- The cache is process-local; persistent circuit artifacts and a network
-  service are reserved interfaces for later releases.
+- Candidate domains and workflow horizons are finite.
+- Loops require `max_steps`; truncated paths remain visible as incomplete worlds.
+- Transitions use ordered first-match semantics, with an optional `otherwise`.
+- State updates are declarative assignments to mapping paths.
+- The compiler currently materializes finite worlds and their shared prefix
+  graph before inference. Search and DP operate on the graph; SAT and PC lower
+  the finite worlds to their solver representations. The IR allows later lazy
+  expansion without changing the user-facing workflow.
+- Stochastic environment outcomes, utilities, parallel steps, and multi-agent
+  ownership remain planned workflow-schema extensions.

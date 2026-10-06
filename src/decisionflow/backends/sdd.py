@@ -11,7 +11,13 @@ from typing import Any, Dict, Mapping, Optional, Sequence, Tuple
 
 from pysdd.sdd import SddManager, SddNode, Vtree
 
-from ..core import DecisionProgram, DecisionResult, InferenceInfo, LocalPotentials, Question
+from ..core import (
+    DecisionProgram,
+    DecisionResult,
+    InferenceInfo,
+    LocalPotentials,
+    Question,
+)
 from ..errors import ConstraintSyntaxError, UnsatisfiableError
 from ..expressions import (
     All,
@@ -43,11 +49,17 @@ def _assignment_mask(assignment: Mapping[int, int]) -> int:
     return sum(int(value) << (var - 1) for var, value in assignment.items())
 
 
-def _better(left: Optional[_MapResult], right: _MapResult, atol: float = 1e-15) -> _MapResult:
+def _better(
+    left: Optional[_MapResult], right: _MapResult, atol: float = 1e-15
+) -> _MapResult:
     if left is None or right.weight > left.weight + atol:
         return right
     if math.isclose(right.weight, left.weight, rel_tol=0.0, abs_tol=atol):
-        return right if _assignment_mask(right.assignment) < _assignment_mask(left.assignment) else left
+        return (
+            right
+            if _assignment_mask(right.assignment) < _assignment_mask(left.assignment)
+            else left
+        )
     return left
 
 
@@ -142,7 +154,9 @@ class _ExpressionCompiler:
     def _operand(self, operand: Operand):
         if isinstance(operand, Variable):
             if operand.name not in self.variables:
-                raise ConstraintSyntaxError("unknown decision variable %s" % operand.name)
+                raise ConstraintSyntaxError(
+                    "unknown decision variable %s" % operand.name
+                )
             return [
                 (self.manager.literal(var), value)
                 for value, var in self.variables[operand.name].items()
@@ -221,12 +235,15 @@ class _ExpressionCompiler:
                         ) from error
                 result |= term
             return result if expr.allowed else ~result
-        raise ConstraintSyntaxError("unsupported expression type %s" % type(expr).__name__)
+        raise ConstraintSyntaxError(
+            "unsupported expression type %s" % type(expr).__name__
+        )
 
 
 class SDDBackend:
     name = "sdd"
     exact = True
+    capabilities = ("valid_mass", "marginals", "joint_map")
 
     def __init__(self, cache_size: int = 32):
         self.cache_size = cache_size
@@ -345,7 +362,9 @@ class SDDBackend:
         joint: JointBuilder,
     ) -> DecisionResult:
         if not isinstance(joint, IndependentJoint):
-            raise NotImplementedError("SDD v0.0 supports IndependentJoint leaf weights")
+            raise NotImplementedError(
+                "the grounded SDD backend supports IndependentJoint leaf weights"
+            )
         compiled, cache_hit = self._cached_compile(program)
         var_count = sum(len(group) for group in compiled.variables.values()) + len(
             compiled.soft_variables
@@ -361,7 +380,9 @@ class SDDBackend:
         started = time.perf_counter()
         wmc, normalizer = self._wmc(compiled, positive, negative)
         if normalizer <= 0:
-            raise UnsatisfiableError("no positive-mass assignment satisfies the grounded constraints")
+            raise UnsatisfiableError(
+                "no positive-mass assignment satisfies the grounded constraints"
+            )
         marginals = {
             name: {value: float(wmc.literal_pr(var)) for value, var in group.items()}
             for name, group in compiled.variables.items()
@@ -375,9 +396,13 @@ class SDDBackend:
         )
         joint_map = {}
         for name, group in compiled.variables.items():
-            selected = [value for value, var in group.items() if mpe.assignment[var] == 1]
+            selected = [
+                value for value, var in group.items() if mpe.assignment[var] == 1
+            ]
             if len(selected) != 1:
-                raise RuntimeError("invalid SDD MAP assignment for %s: %r" % (name, selected))
+                raise RuntimeError(
+                    "invalid SDD MAP assignment for %s: %r" % (name, selected)
+                )
             joint_map[name] = selected[0]
         hard_positive = list(positive)
         for var in compiled.soft_variables.values():
@@ -396,9 +421,7 @@ class SDDBackend:
             for item in program.hard_constraints
             if not item.expr.evaluate(raw_map, program.request.state)
         ]
-        marginal_map = {
-            name: max(row, key=row.get) for name, row in marginals.items()
-        }
+        marginal_map = {name: max(row, key=row.get) for name, row in marginals.items()}
         marginal_violations = [
             item.name
             for item in program.hard_constraints
@@ -429,6 +452,7 @@ class SDDBackend:
                 valid_world_count=int(compiled.root.global_model_count()),
                 circuit_nodes=nodes,
                 circuit_elements=elements,
+                capabilities=self.capabilities,
             ),
             diagnostics={
                 "program": {"name": program.name, "version": program.version},

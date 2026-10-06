@@ -30,4 +30,6 @@ class TypedResponseScorer:
                 values[question.id] = {False: 1.0 - positive, True: positive}
             else:
                 values[question.id] = answer["probabilities"]
-        return LocalPotentials(values, {"adapter": "typed-response"}).normalized_for(request)
+        return LocalPotentials(values, {"adapter": "typed-response"}).normalized_for(
+            request
+        )

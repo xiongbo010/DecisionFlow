@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="DecisionFlow is the inference layer between decision models and real-world execution, producing coherent decisions across complex multi-step workflows."
+    />
+    <meta name="theme-color" content="#f5f7f0" />
+    <meta property="og:title" content="DecisionFlow · Decisions that agree" />
+    <meta
+      property="og:description"
+      content="Connect any decision model, express how your business operates, and produce coherent decisions across complex multi-step workflows."
+    />
+    <title>DecisionFlow · Decisions that agree</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="nav-shell">
+        <a class="brand" href="#top" aria-label="DecisionFlow home">
+          <span class="brand-mark" aria-hidden="true">
+            <span class="mark-node mark-node-a"></span>
+            <span class="mark-node mark-node-b"></span>
+            <span class="mark-node mark-node-c"></span>
+          </span>
+          <span class="brand-wordmark">DecisionFlow</span>
+        </a>
+
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">
+          <span class="sr-only">Toggle navigation</span>
+          <span></span><span></span>
+        </button>
+
+        <nav id="primary-nav" class="primary-nav" aria-label="Primary navigation">
+          <a href="#framework">Framework</a>
+          <a href="#benchmarks">Benchmarks</a>
+          <a href="#ecosystem">Ecosystem</a>
+          <a href="#quickstart">Quickstart</a>
+        </nav>
+
+        <div class="nav-actions">
+          <a class="button button-ghost" href="https://github.com/xiongbo010/DecisionFlow" target="_blank" rel="noreferrer">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .7A11.5 11.5 0 0 0 8.36 23c.58.1.79-.25.79-.56v-2.02c-3.24.7-3.92-1.38-3.92-1.38-.53-1.35-1.3-1.7-1.3-1.7-1.05-.73.08-.72.08-.72 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.72 1.27 3.38.97.1-.75.4-1.27.74-1.56-2.58-.3-5.3-1.3-5.3-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.47.11-3.05 0 0 .97-.31 3.16 1.18a10.95 10.95 0 0 1 5.76 0c2.2-1.49 3.16-1.18 3.16-1.18.63 1.58.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.4-2.72 5.39-5.31 5.68.42.36.79 1.07.79 2.16v3.2c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .7Z"/></svg>
+            GitHub
+          </a>
+          <a class="button button-primary" href="#quickstart">Run locally <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <section id="top" class="hero section-shell">
+        <div class="hero-orbit orbit-one" aria-hidden="true"></div>
+        <div class="hero-orbit orbit-two" aria-hidden="true"></div>
+        <div class="eyebrow reveal">Open Infrastructure for Decision Models</div>
+        <h1 class="reveal">
+          Local judgments<br />
+          <span>One coherent decision</span>
+        </h1>
+        <p class="hero-copy reveal">
+          DecisionFlow is the inference layer between decision models and real-world execution. Connect any model, express how your business operates, and produce coherent decisions across complex, multi-step workflows.
+        </p>
+        <div class="hero-actions reveal">
+          <a class="button button-primary button-large" href="https://github.com/xiongbo010/DecisionFlow" target="_blank" rel="noreferrer">
+            <span class="star-icon" aria-hidden="true">☆</span> Star on GitHub
+          </a>
+          <a class="button button-ghost button-large" href="#framework">See how it works <span aria-hidden="true">↓</span></a>
+        </div>
+
+        <div id="decisionflow-demo" class="flow-demo reveal" aria-label="DecisionFlow compile-and-infer animation">
+          <div class="flow-topbar">
+            <span class="flow-window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span id="flow-demo-title" class="flow-title">decisionflow.run</span>
+            <span class="flow-runtime"><i></i> structured inference</span>
+          </div>
+
+          <div class="flow-stepper" aria-hidden="true">
+            <span class="is-active" data-flow-step="0"><i>01</i> Models</span>
+            <span data-flow-step="1"><i>02</i> Declare</span>
+            <span data-flow-step="2"><i>03</i> Compile</span>
+            <span data-flow-step="3"><i>04</i> Infer</span>
+          </div>
+
+          <div class="flow-canvas">
+            <div class="flow-source flow-panel" data-flow-stage="0">
+              <div class="flow-panel-heading">
+                <span>Decision models</span>
+                <small>choose any</small>
+              </div>
+              <div class="model-pills" aria-label="Compatible model sources">
+                <span>Jev</span><span>Laya</span><span>OpenJev</span><span>API</span>
+              </div>
+              <div class="signal-list">
+                <div><span>route · security</span><b><i style="--signal: 42%"></i></b><em>0.42</em></div>
+                <div><span>fraud · true</span><b><i style="--signal: 78%"></i></b><em>0.78</em></div>
+                <div><span>urgency · high</span><b><i style="--signal: 64%"></i></b><em>0.64</em></div>
+              </div>
+            </div>
+
+            <div class="reasoning-field">
+              <div class="reasoning-rules" data-flow-stage="1">
+                <span>Declarative structure</span>
+                <div>
+                  <i><b class="structure-icon workflow" aria-hidden="true"></b>Workflow</i>
+                  <i><b class="structure-icon policy" aria-hidden="true"></b>Policies</i>
+                  <i><b class="structure-icon ontology" aria-hidden="true"></b>Ontologies</i>
+                  <i><b class="structure-icon constraint" aria-hidden="true"></b>Constraints</i>
+                </div>
+              </div>
+              <div class="compiler-stage" data-flow-stage="2" aria-label="Workflow, policies, ontologies, and constraints flow into the DecisionFlow Compiler, which generates the decision structure">
+                <svg viewBox="0 0 700 48" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="compilerArrowGradient" x1="0" x2="0" y1="0" y2="1">
+                      <stop offset="0" stop-color="#f7d778" />
+                      <stop offset="0.55" stop-color="#eda238" />
+                      <stop offset="1" stop-color="#dc7928" />
+                    </linearGradient>
+                  </defs>
+                  <g class="compiler-merge-streams">
+                    <path d="M230 0 C265 2 310 10 347 19" />
+                    <path d="M325 0 C332 6 342 12 348 19" />
+                    <path d="M425 0 C405 6 365 12 352 19" />
+                    <path d="M520 0 C470 3 405 10 353 19" />
+                  </g>
+                  <circle class="compiler-merge-point" cx="350" cy="20" r="3" />
+                  <text x="366" y="23">COMPILE</text>
+                  <path class="compiler-scope-brace" d="M350 26 C338 30 330 34 300 34 H110 Q100 34 100 44 M350 26 C362 30 370 34 400 34 H590 Q600 34 600 44" />
+                </svg>
+              </div>
+              <svg class="reasoning-graph" data-flow-stage="3" viewBox="0 0 700 340" role="img" aria-labelledby="graph-title graph-desc">
+                <title id="graph-title">DecisionFlow compiles and infers over a branching decision structure</title>
+                <desc id="graph-desc">Decision models and a declarative business workflow are the user inputs. DecisionFlow compiles them into a decision structure, then performs joint inference over the generated graph to return coherent decisions.</desc>
+                <defs>
+                  <linearGradient id="pathGradient" x1="0" x2="1">
+                    <stop offset="0" stop-color="#4d8fbd" />
+                    <stop offset="0.5" stop-color="#347f79" />
+                    <stop offset="1" stop-color="#178065" />
+                  </linearGradient>
+                  <filter id="coreGlow" x="-60%" y="-60%" width="220%" height="220%">
+                    <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#5c8f7b" flood-opacity="0.18" />
+                  </filter>
+                </defs>
+
+                <g class="graph-labels" aria-hidden="true">
+                  <text x="150" y="25">MODEL OUTPUTS</text>
+                  <text x="350" y="25">COMPILED STRUCTURE</text>
+                  <text x="545" y="25">DECISION PATHS</text>
+                </g>
+
+                <g class="reasoning-edges" aria-hidden="true">
+                  <path class="reasoning-edge recommended" d="M25 170 L140 85 L245 118 L350 170 L455 112 L560 82 L675 170" />
+                  <path class="reasoning-edge possible" d="M25 170 L140 170 L245 75 L350 170 L455 58 L560 170 L675 170" />
+                  <path class="reasoning-edge possible" d="M25 170 L140 255 L245 225 L350 170 L455 222 L560 258 L675 170" />
+                  <path class="reasoning-edge possible" d="M140 85 L245 180 L350 170 L455 168 L560 82" />
+                  <path class="reasoning-edge possible" d="M140 255 L245 278 L350 170 L455 278 L560 258" />
+                  <path class="reasoning-edge removed" d="M140 170 L245 278 L350 170 L455 278 L560 170" />
+                  <path class="reasoning-edge removed" d="M245 75 L350 170 L455 58 L560 258" />
+                </g>
+
+                <g class="reasoning-nodes" aria-hidden="true">
+                  <circle class="entry-node" cx="25" cy="170" r="8" />
+                  <circle class="path-node selected" cx="140" cy="85" r="10" />
+                  <circle class="path-node" cx="140" cy="170" r="8" />
+                  <circle class="path-node" cx="140" cy="255" r="8" />
+                  <circle class="path-node" cx="245" cy="75" r="8" />
+                  <circle class="path-node selected" cx="245" cy="118" r="10" />
+                  <circle class="path-node" cx="245" cy="180" r="8" />
+                  <circle class="path-node removed-node" cx="245" cy="278" r="7" />
+
+                  <circle class="path-node" cx="455" cy="58" r="8" />
+                  <circle class="path-node selected" cx="455" cy="112" r="10" />
+                  <circle class="path-node" cx="455" cy="168" r="8" />
+                  <circle class="path-node" cx="455" cy="222" r="8" />
+                  <circle class="path-node removed-node" cx="455" cy="278" r="7" />
+                  <circle class="path-node selected" cx="560" cy="82" r="10" />
+                  <circle class="path-node" cx="560" cy="170" r="8" />
+                  <circle class="path-node" cx="560" cy="258" r="8" />
+                  <circle class="exit-node" cx="675" cy="170" r="11" />
+                </g>
+
+                <g class="reasoning-core" filter="url(#coreGlow)">
+                  <circle class="core-ring ring-a" cx="350" cy="170" r="76" />
+                  <circle class="core-ring ring-b" cx="350" cy="170" r="65" />
+                  <g class="core-orbit-dots" aria-hidden="true">
+                    <circle cx="350" cy="94" r="4" />
+                    <circle cx="416" cy="208" r="4" />
+                    <circle cx="284" cy="208" r="4" />
+                  </g>
+                  <circle class="core-disc" cx="350" cy="170" r="54" />
+                  <text class="core-brand" x="350" y="159">DECISIONFLOW</text>
+                  <text class="core-action" x="350" y="177">Structured</text>
+                  <text class="core-sub" x="350" y="192">INFERENCE</text>
+                </g>
+
+                <g class="path-labels" aria-hidden="true">
+                  <text x="455" y="95">verify</text>
+                  <text x="560" y="65">hold</text>
+                  <text x="644" y="152">human</text>
+                  <text class="removed-label" x="455" y="300">conflict removed</text>
+                </g>
+
+                <g class="path-probabilities" aria-hidden="true">
+                  <text class="path-probability best" x="606" y="62">0.61<tspan dx="5">BEST MAP</tspan></text>
+                  <text class="path-probability" x="620" y="168">0.24</text>
+                  <text class="path-probability" x="606" y="278">0.15</text>
+                </g>
+              </svg>
+              <div class="inference-backends" data-flow-stage="3" aria-label="Selectable inference backends: probabilistic circuits, constrained beam search, A star search, greedy, dynamic programming, SAT or DPLL, top k, and MCMC">
+                <span>Inference backend</span>
+                <div>
+                  <i class="is-selected"><b></b>Probabilistic circuits</i>
+                  <i><b></b>Constrained beam search</i>
+                  <i><b></b>A* search</i>
+                  <i><b></b>Greedy</i>
+                  <i><b></b>dynamic_programming</i>
+                  <i><b></b>SAT / DPLL</i>
+                  <i><b></b>top_k</i>
+                  <i><b></b>MCMC</i>
+                </div>
+              </div>
+            </div>
+
+            <div class="flow-result flow-panel" data-flow-stage="3">
+              <div class="flow-panel-heading">
+                <span>Coherent decisions</span>
+                <small>ready to act</small>
+              </div>
+              <div class="recommendation-lead">
+                <small>Start with</small>
+                <strong>Verify identity</strong>
+              </div>
+              <div class="decision-distribution" role="img" aria-label="Decision distribution: verify identity 0.61, manual review 0.24, continue 0.15">
+                <div class="distribution-heading"><span>Decision distribution</span><small>posterior</small></div>
+                <div class="distribution-row is-best">
+                  <div><span>Verify identity</span><strong>0.61</strong></div>
+                  <b><i style="--probability: 61%"></i></b>
+                </div>
+                <div class="distribution-row">
+                  <div><span>Manual review</span><strong>0.24</strong></div>
+                  <b><i style="--probability: 24%"></i></b>
+                </div>
+                <div class="distribution-row">
+                  <div><span>Continue</span><strong>0.15</strong></div>
+                  <b><i style="--probability: 15%"></i></b>
+                </div>
+              </div>
+              <div class="coherence-check"><span aria-hidden="true">✓</span> Aligned across all structures</div>
+            </div>
+          </div>
+
+          <div class="flow-footer">
+            <span class="flow-live" aria-live="polite">Connecting decision models</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="model-ribbon" aria-label="Compatible decision-model ecosystem">
+        <div class="ribbon-track">
+          <a href="https://github.com/NandhaKishorM/laya" target="_blank" rel="noreferrer"><i class="ribbon-dot mint"></i>Laya</a>
+          <a href="https://github.com/jaredpalmer/kev" target="_blank" rel="noreferrer"><i class="ribbon-dot blue"></i>Kev</a>
+          <a href="https://github.com/Zefan-Cai/Open-Jev" target="_blank" rel="noreferrer"><i class="ribbon-dot orange"></i>Open-Jev</a>
+          <a href="https://github.com/SimpleJev/JevAny" target="_blank" rel="noreferrer"><i class="ribbon-dot violet"></i>JevAny</a>
+          <a href="https://github.com/fastino-ai/GLiNER2" target="_blank" rel="noreferrer"><i class="ribbon-dot mint"></i>GLiNER2.5</a>
+          <a href="https://huggingface.co/perplexity-ai/pplx-decider-v1-27b" target="_blank" rel="noreferrer"><i class="ribbon-dot blue"></i>pplx-decider</a>
+          <a href="https://github.com/strands-labs/strands-decider" target="_blank" rel="noreferrer"><i class="ribbon-dot orange"></i>Strands</a>
+          <a href="https://huggingface.co/Cloudflare/clef" target="_blank" rel="noreferrer"><i class="ribbon-dot violet"></i>Clef</a>
+          <span aria-hidden="true"><i class="ribbon-dot mint"></i>Any scorer</span>
+        </div>
+      </section>
+
+      <section id="framework" class="section-shell content-section">
+        <div class="section-heading reveal">
+          <div>
+            <span class="kicker">Framework</span>
+            <h2>From separate answers to a structured decision.</h2>
+          </div>
+          <p>
+            Users choose their decision models and declare how the business operates. DecisionFlow compiles that description into an inference-ready decision structure, then evaluates the complete decision jointly.
+          </p>
+        </div>
+
+        <div class="method-grid">
+          <article class="method-card method-card-wide reveal">
+            <div class="card-number">01</div>
+            <div class="method-card-copy">
+              <span class="card-label">Score locally</span>
+              <h3>Bring the model you trust.</h3>
+              <p>Use hosted APIs, open-weight checkpoints, Python callables, HTTP endpoints, or cached probabilities. DecisionFlow does not import or lock you to a model provider.</p>
+              <div class="probability-row" aria-label="Three example local probability distributions">
+                <div><span>route</span><b style="--p: 71%"></b><small>billing 0.71</small></div>
+                <div><span>risk</span><b style="--p: 62%"></b><small>high 0.62</small></div>
+                <div><span>action</span><b style="--p: 55%"></b><small>review 0.55</small></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="method-card reveal">
+            <div class="card-number">02</div>
+            <span class="card-label">Declare structure</span>
+            <h3>Declare how the business works.</h3>
+            <p>Describe workflows, policies, constraints, ontologies, preferences, and the relationships between decisions.</p>
+            <div class="rule-stack" aria-hidden="true">
+              <span><i>risk = high</i><b>implies</b><i>action ≠ allow</i></span>
+              <span><i>fraud = true</i><b>implies</b><i>route = security</i></span>
+              <span class="soft-rule"><i>urgent ≥ 2</i><b>prefer</b><i>human review</i></span>
+            </div>
+          </article>
+
+          <article class="method-card reveal">
+            <div class="card-number">03</div>
+            <span class="card-label">Compile and infer</span>
+            <h3>Generate the decision structure.</h3>
+            <p>DecisionFlow compiles the declaration into a reusable graph and performs joint inference over complete, multi-step plans.</p>
+            <div class="world-map" aria-hidden="true">
+              <span class="valid">A</span><span>B</span><span class="valid selected">C</span><span>D</span><span class="valid">E</span><span>F</span>
+            </div>
+            <div class="world-legend"><span><i></i> valid world</span><span><i></i> removed</span></div>
+          </article>
+        </div>
+
+        <div class="output-strip reveal">
+          <span>Compiled structure</span><span>Joint posterior</span><span>Best complete plan</span><span>Decision confidence</span><span>Multi-step paths</span>
+        </div>
+      </section>
+
+      <section id="benchmarks" class="evidence-section benchmark-section">
+        <div class="section-shell">
+          <div class="section-heading reveal">
+            <div>
+              <span class="kicker">Benchmarks</span>
+              <h2>Multi-step decisions, measured end to end.</h2>
+            </div>
+            <p>A 50-case referral-abuse pilot evaluates a seven-step workflow with six tools and five coupled outputs at every state. The comparison measures both final task success and consistency throughout the trajectory.</p>
+          </div>
+
+          <div class="benchmark-grid">
+            <article class="benchmark-demo reveal">
+              <div class="benchmark-card-heading">
+                <div>
+                  <span class="metric-context">SOP-Bench · 50-case pilot</span>
+                  <h3>Referral-abuse investigation</h3>
+                </div>
+                <span class="benchmark-status"><i></i>7 steps</span>
+              </div>
+
+              <p class="benchmark-summary">One run coordinates evidence gathering, risk assessment, enforcement selection, and finalization while keeping five typed decisions coherent at every step.</p>
+
+              <div class="trajectory-demo" aria-label="Example seven-step DecisionFlow trajectory">
+                <div class="trajectory-line" aria-hidden="true"><i></i></div>
+                <ol>
+                  <li><span>01</span><b>Investigate</b></li>
+                  <li><span>02</span><b>Determine</b></li>
+                  <li><span>03</span><b>Temporal</b></li>
+                  <li><span>04</span><b>History</b></li>
+                  <li><span>05</span><b>Traffic</b></li>
+                  <li><span>06</span><b>Financial</b></li>
+                  <li class="is-final"><span>07</span><b>Finalize</b></li>
+                </ol>
+              </div>
+
+              <div class="benchmark-facts" aria-label="Experiment scale">
+                <span><b>6</b> tools</span>
+                <span><b>5</b> coupled outputs</span>
+                <span><b>1.83 ms</b> inference / step</span>
+              </div>
+            </article>
+
+            <article class="benchmark-chart reveal">
+              <div class="benchmark-card-heading">
+                <div>
+                  <span class="metric-context">End-to-end comparison</span>
+                  <h3>Success and consistency</h3>
+                </div>
+                <span class="chart-unit">%</span>
+              </div>
+
+              <div class="bar-panel" role="img" aria-label="Task success: Local Jev 0 percent, Action-masked workflow 12 percent, Procedural SOP 100 percent, DecisionFlow 100 percent">
+                <div class="bar-panel-heading"><span>Task success</span><small>higher is better</small></div>
+                <div class="benchmark-bar"><span>Local Jev</span><b><i style="--bar: 0%"></i></b><strong>0</strong></div>
+                <div class="benchmark-bar"><span>Action-masked</span><b><i style="--bar: 12%"></i></b><strong>12</strong></div>
+                <div class="benchmark-bar procedural"><span>Procedural SOP</span><b><i style="--bar: 100%"></i></b><strong>100</strong></div>
+                <div class="benchmark-bar decisionflow"><span>DecisionFlow</span><b><i style="--bar: 100%"></i></b><strong>100</strong></div>
+              </div>
+
+              <div class="bar-panel" role="img" aria-label="Inconsistent typed outputs: Local Jev 100 percent, Action-masked workflow 95.7 percent, Procedural SOP 81.4 percent, DecisionFlow 0 percent">
+                <div class="bar-panel-heading"><span>Inconsistent outputs</span><small>lower is better</small></div>
+                <div class="benchmark-bar"><span>Local Jev</span><b><i style="--bar: 100%"></i></b><strong>100</strong></div>
+                <div class="benchmark-bar"><span>Action-masked</span><b><i style="--bar: 95.7%"></i></b><strong>95.7</strong></div>
+                <div class="benchmark-bar procedural"><span>Procedural SOP</span><b><i style="--bar: 81.4%"></i></b><strong>81.4</strong></div>
+                <div class="benchmark-bar decisionflow"><span>DecisionFlow</span><b><i style="--bar: 0%"></i></b><strong>0</strong></div>
+              </div>
+            </article>
+          </div>
+
+          <div class="evidence-note benchmark-note reveal">
+            <div class="note-icon" aria-hidden="true">≈</div>
+            <p><strong>Both the procedural SOP and DecisionFlow reach 100% task success in this deterministic pilot.</strong> DecisionFlow's additional result is zero inconsistent typed outputs across the full trajectory. This is a completed pilot, not a claim of universal superiority.</p>
+            <a href="https://github.com/xiongbo010/DecisionFlow/blob/main/experiments/EXPERIMENT_LEDGER.md" target="_blank" rel="noreferrer">Experiment ledger <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+      </section>
+
+      <section id="ecosystem" class="section-shell content-section ecosystem-section">
+        <div class="section-heading reveal">
+          <div>
+            <span class="kicker">Open ecosystem</span>
+            <h2>Decision models in, structured decisions out.</h2>
+          </div>
+          <p>This directory highlights active open projects that can supply probabilities, serve as baselines, or extend the constrained-decision stack. Project names and licenses belong to their respective maintainers.</p>
+        </div>
+
+        <div class="project-filters reveal" role="group" aria-label="Filter ecosystem projects">
+          <button class="filter-button active" type="button" data-filter="all">All projects</button>
+          <button class="filter-button" type="button" data-filter="decoder">LLM-based</button>
+          <button class="filter-button" type="button" data-filter="encoder">Encoder-based</button>
+          <button class="filter-button" type="button" data-filter="multimodal">Multimodal</button>
+        </div>
+
+        <div class="project-grid">
+          <article class="project-card reveal" data-category="encoder">
+            <div class="project-topline"><span class="project-symbol symbol-mint">L</span><span class="license">Apache-2.0</span></div>
+            <h3>Laya</h3>
+            <p>A 322M/421M non-autoregressive family for Choice, Score, and yes/no decisions, including a 100+ language checkpoint and broad local deployment support.</p>
+            <div class="tag-row"><span>multilingual</span><span>ONNX</span><span>fine-tuning</span></div>
+            <div class="project-links">
+              <a href="https://github.com/NandhaKishorM/laya" target="_blank" rel="noreferrer">GitHub ↗</a>
+              <a href="https://nandhakishorm.github.io/laya/" target="_blank" rel="noreferrer">Docs ↗</a>
+            </div>
+          </article>
+
+          <article class="project-card reveal" data-category="decoder">
+            <div class="project-topline"><span class="project-symbol symbol-blue">K</span><span class="license">Apache-2.0</span></div>
+            <h3>Kev</h3>
+            <p>A trainable Qwen-based decision-model family spanning 0.8B, 4B, 9B, and 27B, with System One-compatible serving and local CUDA or MLX paths.</p>
+            <div class="tag-row"><span>Qwen</span><span>0.8B–27B</span><span>MLX</span></div>
+            <div class="project-links"><a href="https://github.com/jaredpalmer/kev" target="_blank" rel="noreferrer">GitHub ↗</a></div>
+          </article>
+
+          <article class="project-card reveal" data-category="decoder">
+            <div class="project-topline"><span class="project-symbol symbol-orange">O</span><span class="license">MIT</span></div>
+            <h3>Open-Jev</h3>
+            <p>Open 2B, 9B, and 27B decision checkpoints built with LoRA and a decision head over Qwen backbones.</p>
+            <div class="tag-row"><span>Qwen</span><span>LoRA</span><span>2B–27B</span></div>
+            <div class="project-links"><a href="https://github.com/Zefan-Cai/Open-Jev" target="_blank" rel="noreferrer">GitHub ↗</a></div>
+          </article>
+
+          <article class="project-card reveal" data-category="decoder multimodal">
+            <div class="project-topline"><span class="project-symbol symbol-violet">J</span><span class="license">Apache-2.0</span></div>
+            <h3>JevAny</h3>
+            <p>Infrastructure for training, evaluating, and serving decision models across Qwen, Gemma, Muse, Mistral, GLM, Nemotron, and Llama families.</p>
+            <div class="tag-row"><span>26 backbones</span><span>training</span><span>serving</span></div>
+            <div class="project-links">
+              <a href="https://github.com/SimpleJev/JevAny" target="_blank" rel="noreferrer">GitHub ↗</a>
+              <a href="https://simplejev.org/JevAny/" target="_blank" rel="noreferrer">Website ↗</a>
+            </div>
+          </article>
+
+          <article class="project-card reveal" data-category="encoder">
+            <div class="project-topline"><span class="project-symbol symbol-mint">G</span><span class="license">Apache-2.0</span></div>
+            <h3>GLiNER2.5-Decide</h3>
+            <p>A compact schema-conditioned encoder for operational classification. Its Classifier runtime also supports hard constrained joint decoding.</p>
+            <div class="tag-row"><span>340M</span><span>constraints</span><span>extraction</span></div>
+            <div class="project-links">
+              <a href="https://github.com/fastino-ai/GLiNER2" target="_blank" rel="noreferrer">GitHub ↗</a>
+              <a href="https://huggingface.co/fastino/GLiNER2.5-Decide" target="_blank" rel="noreferrer">Model ↗</a>
+            </div>
+          </article>
+
+          <article class="project-card reveal" data-category="decoder multimodal">
+            <div class="project-topline"><span class="project-symbol symbol-blue">P</span><span class="license">Apache-2.0</span></div>
+            <h3>pplx-decider</h3>
+            <p>Perplexity's open 27B decision checkpoint, based on Qwen3.8 and designed for text and image-conditioned decisions.</p>
+            <div class="tag-row"><span>27B</span><span>Qwen</span><span>vision</span></div>
+            <div class="project-links"><a href="https://huggingface.co/perplexity-ai/pplx-decider-v1-27b" target="_blank" rel="noreferrer">Hugging Face ↗</a></div>
+          </article>
+
+          <article class="project-card reveal" data-category="decoder">
+            <div class="project-topline"><span class="project-symbol symbol-orange">S</span><span class="license">Apache-2.0</span></div>
+            <h3>Strands Decider</h3>
+            <p>A small Qwen3.5-based model for agent routing, guardrails, tool selection, and calibrated operational decisions.</p>
+            <div class="tag-row"><span>≈2B</span><span>agents</span><span>trainable</span></div>
+            <div class="project-links"><a href="https://github.com/strands-labs/strands-decider" target="_blank" rel="noreferrer">GitHub ↗</a></div>
+          </article>
+
+          <article class="project-card reveal" data-category="decoder">
+            <div class="project-topline"><span class="project-symbol symbol-violet">M</span><span class="license">Apache-2.0</span></div>
+            <h3>Mapika Decider</h3>
+            <p>A family of Qwen3.5 decision checkpoints with 2B, 4B, and 35B-A3B variants, plus local GGUF deployment options.</p>
+            <div class="tag-row"><span>Qwen</span><span>GGUF</span><span>2B–35B</span></div>
+            <div class="project-links"><a href="https://github.com/Mapika/decider" target="_blank" rel="noreferrer">GitHub ↗</a></div>
+          </article>
+
+          <article class="project-card reveal" data-category="decoder multimodal">
+            <div class="project-topline"><span class="project-symbol symbol-mint">C</span><span class="license">Apache-2.0</span></div>
+            <h3>Cloudflare Clef</h3>
+            <p>Open 9B and 27B decision models with a System One-compatible interface, 64K context, and text-plus-image inputs.</p>
+            <div class="tag-row"><span>9B / 27B</span><span>vision</span><span>64K</span></div>
+            <div class="project-links">
+              <a href="https://huggingface.co/Cloudflare/clef" target="_blank" rel="noreferrer">Hugging Face ↗</a>
+              <a href="https://developers.cloudflare.com/workers-ai/models/clef/" target="_blank" rel="noreferrer">Docs ↗</a>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="quickstart" class="quickstart-section">
+        <div class="section-shell quickstart-grid">
+          <div class="quickstart-copy reveal">
+            <span class="kicker">Get started</span>
+            <h2>Add structure without replacing your model.</h2>
+            <p>Install the core package, provide model probabilities or configure a scorer adapter, then declare the relationships your application already knows.</p>
+            <div class="quickstart-links">
+              <a href="https://github.com/xiongbo010/DecisionFlow" target="_blank" rel="noreferrer">Browse the repository ↗</a>
+              <a href="https://github.com/xiongbo010/DecisionFlow/blob/main/docs/json-format.md" target="_blank" rel="noreferrer">Constraint format ↗</a>
+            </div>
+          </div>
+
+          <div class="code-window reveal">
+            <div class="code-toolbar">
+              <div><i></i><i></i><i></i><span>Python</span></div>
+              <button id="copy-code" type="button" data-copy-target="quickstart-code">Copy</button>
+            </div>
+            <pre id="quickstart-code"><code><span class="code-muted"># Install the exact SDD backend</span>
+pip install -e <span class="code-string">'.[sdd]'</span>
+
+<span class="code-keyword">from</span> decisionflow <span class="code-keyword">import</span> DecisionFlow
+
+request = {
+    <span class="code-string">"state"</span>: {<span class="code-string">"channel"</span>: <span class="code-string">"card"</span>},
+    <span class="code-string">"questions"</span>: [
+        {<span class="code-string">"id"</span>: <span class="code-string">"route"</span>, <span class="code-string">"type"</span>: <span class="code-string">"choice"</span>,
+         <span class="code-string">"options"</span>: [<span class="code-string">"billing"</span>, <span class="code-string">"security"</span>]},
+        {<span class="code-string">"id"</span>: <span class="code-string">"fraud"</span>, <span class="code-string">"type"</span>: <span class="code-string">"noul"</span>},
+    ],
+    <span class="code-string">"probabilities"</span>: {
+        <span class="code-string">"route"</span>: {<span class="code-string">"billing"</span>: .6, <span class="code-string">"security"</span>: .4},
+        <span class="code-string">"fraud"</span>: .7,
+    },
+}
+
+constraints = {<span class="code-string">"hard"</span>: [{<span class="code-string">"expr"</span>: {<span class="code-string">"implies"</span>: [
+    {<span class="code-string">"eq"</span>: [{<span class="code-string">"var"</span>: <span class="code-string">"fraud"</span>}, <span class="code-keyword">True</span>]},
+    {<span class="code-string">"eq"</span>: [{<span class="code-string">"var"</span>: <span class="code-string">"route"</span>}, <span class="code-string">"security"</span>]}
+]}]}]}
+
+result = DecisionFlow(backend=<span class="code-string">"auto"</span>).infer(
+    request, constraints
+)
+print(result.joint_map)
+print(result.marginals)
+print(result.valid_mass)</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="closing-section section-shell">
+        <div class="closing-card reveal">
+          <div class="closing-glow" aria-hidden="true"></div>
+          <span class="kicker">The next layer</span>
+          <h2>Models produce judgments.<br />DecisionFlow makes them agree.</h2>
+          <p>Build decision systems from declarative business workflows without hand-authoring the inference graph or hiding business logic inside prompts.</p>
+          <div class="hero-actions">
+            <a class="button button-primary button-large" href="https://github.com/xiongbo010/DecisionFlow" target="_blank" rel="noreferrer">Explore on GitHub ↗</a>
+            <a class="button button-ghost button-large" href="https://github.com/xiongbo010/DecisionFlow#readme" target="_blank" rel="noreferrer">Read the method</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="section-shell footer-grid">
+        <div>
+          <a class="brand" href="#top">
+            <span class="brand-mark small" aria-hidden="true">
+              <span class="mark-node mark-node-a"></span><span class="mark-node mark-node-b"></span><span class="mark-node mark-node-c"></span>
+            </span>
+            <span class="brand-wordmark">DecisionFlow</span>
+          </a>
+          <p>Structured reasoning for coherent decisions.</p>
+        </div>
+        <div class="footer-links">
+          <a href="https://github.com/xiongbo010/DecisionFlow" target="_blank" rel="noreferrer">GitHub</a>
+          <a href="https://github.com/xiongbo010/DecisionFlow#readme" target="_blank" rel="noreferrer">Documentation</a>
+          <a href="https://github.com/xiongbo010/DecisionFlow/tree/main/experiments#readme" target="_blank" rel="noreferrer">Experiments</a>
+          <a href="https://github.com/xiongbo010/DecisionFlow/blob/main/LICENSE" target="_blank" rel="noreferrer">Apache-2.0</a>
+        </div>
+      </div>
+      <div class="section-shell footer-bottom">
+        <span>© 2026 DecisionFlow contributors</span>
+        <span>Third-party projects are listed for interoperability and comparison; no affiliation is implied.</span>
+      </div>
+    </footer>
+  </body>
+</html>

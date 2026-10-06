@@ -1,6 +1,6 @@
 """Base-joint interfaces.
 
-The v0.0 exact backends implement the independent product joint. The protocol
+The low-level exact backends implement the independent product joint. The protocol
 keeps directed and learned factor joints outside the frontend/backend boundary.
 """
 
@@ -19,8 +19,7 @@ class JointBuilder(Protocol):
         assignment: Mapping[str, Any],
         request: DecisionRequest,
         potentials: LocalPotentials,
-    ) -> float:
-        ...
+    ) -> float: ...
 
 
 class IndependentJoint:
@@ -31,4 +30,3 @@ class IndependentJoint:
         for question in request.questions:
             result *= potentials.values[question.id][assignment[question.id]]
         return result
-

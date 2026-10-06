@@ -1,42 +1,54 @@
 from decisionflow import DecisionFlowTools
 
-
-def request(identifier="one"):
-    return {
-        "id": identifier,
-        "state": {},
-        "questions": [{"id": "action", "type": "choice", "options": ["a", "b"]}],
-        "probabilities": {"action": [0.25, 0.75]},
-    }
+from workflow_fixtures import decision_model, workflow_document
 
 
-def test_tool_dispatch_and_batch():
-    tools = DecisionFlowTools()
-    single = tools.call("decisionflow_infer", {"request": request()})
-    batch = tools.call("decisionflow_evaluate", {"requests": [request("a"), request("b")]})
-
-    assert single["joint_map"] == {"action": "b"}
-    assert len(tools.schemas) == 3
-    assert batch["count"] == batch["succeeded"] == 2
-    assert batch["failed"] == 0
-
-
-def test_trajectory_tool():
-    result = DecisionFlowTools().decisionflow_trajectory(
-        {
-            "initial_state": "start",
-            "actions": ["inspect", "finish"],
-            "horizon": 2,
-            "terminal_states": ["done"],
-            "policy": {
-                "start": {"inspect": 0.4, "finish": 0.6},
-                "inspected": {"inspect": 0.1, "finish": 0.9},
-            },
-            "transitions": {
-                "start": {"inspect": "inspected"},
-                "inspected": {"finish": "done"},
-            },
-        }
+def test_tool_runs_configured_workflow():
+    tools = DecisionFlowTools(
+        model=decision_model,
+        workflow=workflow_document(),
+        backend="enumeration",
     )
-    assert result["exact"] is True
-    assert result["first_action_marginals"]["inspect"] == 1.0
+
+    result = tools.call("decisionflow_run", {"state": {"status": "open"}})
+
+    assert result["prediction_kind"] == "joint_map"
+    assert result["valid_mass"] > 0
+    assert len(tools.schemas) == 2
+
+
+def test_tool_accepts_workflow_and_backend_per_call():
+    tools = DecisionFlowTools(model=decision_model)
+
+    result = tools.call(
+        "decisionflow_run",
+        {
+            "state": {"status": "open"},
+            "workflow": workflow_document(),
+            "backend": "greedy",
+        },
+    )
+
+    assert result["prediction_kind"] == "local_greedy_flow"
+    assert result["diagnostics"]["prediction_feasible"] is False
+
+
+def test_backend_discovery_tool():
+    tools = DecisionFlowTools(model=decision_model, workflow=workflow_document())
+    result = tools.call("decisionflow_backends", {})
+
+    assert set(result) == {
+        "a_star",
+        "beam_search",
+        "dynamic_programming",
+        "enumeration",
+        "greedy",
+        "pc",
+        "sampling",
+        "sat",
+        "top_k",
+    }
+    assert result["greedy"]["capabilities"] == [
+        "point_prediction",
+        "feasibility_check",
+    ]

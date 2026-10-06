@@ -13,6 +13,4 @@ class Scorer(Protocol):
     and inference remain backend-independent.
     """
 
-    def score(self, request: DecisionRequest) -> LocalPotentials:
-        ...
-
+    def score(self, request: DecisionRequest) -> LocalPotentials: ...

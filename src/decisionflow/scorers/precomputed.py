@@ -9,4 +9,3 @@ class PrecomputedScorer:
 
     def score(self, request: DecisionRequest) -> LocalPotentials:
         return self.potentials.normalized_for(request)
-

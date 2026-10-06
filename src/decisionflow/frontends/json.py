@@ -4,7 +4,13 @@ from __future__ import annotations
 
 from typing import Any, Dict, Mapping, Sequence, Tuple
 
-from ..core import Constraint, DecisionProgram, DecisionRequest, LocalPotentials, Question
+from ..core import (
+    Constraint,
+    DecisionProgram,
+    DecisionRequest,
+    LocalPotentials,
+    Question,
+)
 from ..errors import ConstraintSyntaxError
 from ..expressions import (
     All,
@@ -28,7 +34,9 @@ from ..expressions import (
 class JsonFrontend:
     name = "json"
 
-    def compile(self, request: Mapping[str, Any], constraints: Any = None) -> DecisionProgram:
+    def compile(
+        self, request: Mapping[str, Any], constraints: Any = None
+    ) -> DecisionProgram:
         return parse_program(request, constraints)
 
 
@@ -43,7 +51,9 @@ def _question_options(payload: Mapping[str, Any]) -> Tuple[Any, ...]:
         raise ConstraintSyntaxError("question options must be a list or object")
     values = []
     for item in raw:
-        values.append(item.get("value") if isinstance(item, Mapping) and "value" in item else item)
+        values.append(
+            item.get("value") if isinstance(item, Mapping) and "value" in item else item
+        )
     return tuple(values)
 
 
@@ -90,7 +100,11 @@ def parse_operand(payload: Any) -> Operand:
 
 
 def _pair(name: str, payload: Any) -> Tuple[Any, Any]:
-    if not isinstance(payload, Sequence) or isinstance(payload, (str, bytes)) or len(payload) != 2:
+    if (
+        not isinstance(payload, Sequence)
+        or isinstance(payload, (str, bytes))
+        or len(payload) != 2
+    ):
         raise ConstraintSyntaxError("%s expects a two-item list" % name)
     return payload[0], payload[1]
 
@@ -118,15 +132,23 @@ def parse_expr(payload: Any) -> Expr:
         return All(children) if op == "all" else AnyOf(children)
     if op in {"implies", "iff"}:
         left, right = _pair(op, body)
-        return Implies(parse_expr(left), parse_expr(right)) if op == "implies" else Iff(
-            parse_expr(left), parse_expr(right)
+        return (
+            Implies(parse_expr(left), parse_expr(right))
+            if op == "implies"
+            else Iff(parse_expr(left), parse_expr(right))
         )
     if op in {"at_most", "at_least", "exactly"}:
         if not isinstance(body, Mapping) or "k" not in body or "items" not in body:
             raise ConstraintSyntaxError("%s expects {k, items}" % op)
-        return Cardinality(op, int(body["k"]), tuple(parse_expr(item) for item in body["items"]))
+        return Cardinality(
+            op, int(body["k"]), tuple(parse_expr(item) for item in body["items"])
+        )
     if op in {"allowed_table", "forbidden_table"}:
-        if not isinstance(body, Mapping) or "variables" not in body or "rows" not in body:
+        if (
+            not isinstance(body, Mapping)
+            or "variables" not in body
+            or "rows" not in body
+        ):
             raise ConstraintSyntaxError("%s expects {variables, rows}" % op)
         variables = tuple(map(str, body["variables"]))
         rows = tuple(tuple(row) for row in body["rows"])
@@ -156,10 +178,14 @@ def parse_constraints(payload: Any) -> Tuple[Constraint, ...]:
                 raise ConstraintSyntaxError("constraint entry needs expr")
             result.append(
                 Constraint(
-                    name=str(row.get("name", ("hard" if hard else "soft") + "-%d" % index)),
+                    name=str(
+                        row.get("name", ("hard" if hard else "soft") + "-%d" % index)
+                    ),
                     expr=parse_expr(expression),
                     hard=hard,
-                    penalty=0.0 if hard else float(row.get("penalty", row.get("weight", 1.0))),
+                    penalty=0.0
+                    if hard
+                    else float(row.get("penalty", row.get("weight", 1.0))),
                     source=row.get("source"),
                     metadata=row.get("metadata", {}),
                 )
@@ -167,10 +193,14 @@ def parse_constraints(payload: Any) -> Tuple[Constraint, ...]:
     return tuple(result)
 
 
-def parse_program(request_payload: Mapping[str, Any], constraints_payload: Any = None) -> DecisionProgram:
+def parse_program(
+    request_payload: Mapping[str, Any], constraints_payload: Any = None
+) -> DecisionProgram:
     request = parse_request(request_payload)
-    constraints_doc = constraints_payload if constraints_payload is not None else request_payload.get(
-        "constraints", {}
+    constraints_doc = (
+        constraints_payload
+        if constraints_payload is not None
+        else request_payload.get("constraints", {})
     )
     constraints = list(parse_constraints(constraints_doc))
     for variable, value in request.evidence.items():
@@ -192,28 +222,42 @@ def parse_program(request_payload: Mapping[str, Any], constraints_payload: Any =
     )
 
 
-def parse_probabilities(payload: Mapping[str, Any], request: DecisionRequest) -> LocalPotentials:
+def parse_probabilities(
+    payload: Mapping[str, Any], request: DecisionRequest
+) -> LocalPotentials:
     raw = payload.get("probabilities")
     if raw is None:
-        raise ConstraintSyntaxError("request needs probabilities when no scorer is configured")
+        raise ConstraintSyntaxError(
+            "request needs probabilities when no scorer is configured"
+        )
     values: Dict[str, Dict[Any, float]] = {}
     for question in request.questions:
         row = raw.get(question.id)
         if row is None:
             raise ConstraintSyntaxError("missing probabilities for %s" % question.id)
         if isinstance(row, Mapping):
-            if question.type in {"noul", "boolean"} and "true" not in row and "false" not in row:
+            if (
+                question.type in {"noul", "boolean"}
+                and "true" not in row
+                and "false" not in row
+            ):
                 positive = float(row.get("probability_true", row.get("noul")))
                 values[question.id] = {False: 1.0 - positive, True: positive}
             else:
                 values[question.id] = dict(row)
         elif isinstance(row, Sequence) and not isinstance(row, (str, bytes)):
             if len(row) != len(question.options):
-                raise ConstraintSyntaxError("probability vector length mismatch for %s" % question.id)
+                raise ConstraintSyntaxError(
+                    "probability vector length mismatch for %s" % question.id
+                )
             values[question.id] = dict(zip(question.options, map(float, row)))
         elif question.type in {"noul", "boolean"}:
             positive = float(row)
             values[question.id] = {False: 1.0 - positive, True: positive}
         else:
-            raise ConstraintSyntaxError("unsupported probability representation for %s" % question.id)
-    return LocalPotentials(values, payload.get("probability_metadata", {})).normalized_for(request)
+            raise ConstraintSyntaxError(
+                "unsupported probability representation for %s" % question.id
+            )
+    return LocalPotentials(
+        values, payload.get("probability_metadata", {})
+    ).normalized_for(request)

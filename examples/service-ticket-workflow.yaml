@@ -1,0 +1,51 @@
+name: service-ticket
+version: 1
+start: classify
+max_steps: 3
+
+steps:
+  classify:
+    questions:
+      - id: route
+        type: choice
+        instruction: Which department should handle the ticket?
+        options: [billing, security]
+      - id: fraud
+        type: noul
+        instruction: Does the ticket indicate fraud?
+    transitions:
+      - name: possible-fraud
+        when: {eq: [{var: fraud}, true]}
+        goto: review
+        set: {queue: {const: security}}
+      - name: ordinary-ticket
+        otherwise: true
+        goto: resolved
+        set: {queue: {var: route}}
+
+  review:
+    questions:
+      - id: action
+        type: choice
+        instruction: Which protective action should be taken?
+        options: [freeze, dismiss]
+    transitions:
+      - otherwise: true
+        goto: resolved
+        set: {status: {const: resolved}}
+
+  resolved:
+    terminal: true
+
+constraints:
+  hard:
+    - name: fraud-routes-security
+      expr:
+        implies:
+          - {eq: [{var: classify.fraud}, true]}
+          - {eq: [{var: classify.route}, security]}
+    - name: fraud-cannot-be-dismissed
+      expr:
+        implies:
+          - {eq: [{var: classify.fraud}, true]}
+          - {eq: [{var: review.action}, freeze]}

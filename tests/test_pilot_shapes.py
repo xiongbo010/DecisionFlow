@@ -8,7 +8,7 @@ decision schemas and rules.
 import importlib.util
 import unittest
 
-from decisionflow import DecisionFlow
+from decisionflow.engine import DecisionEngine
 
 
 HAS_SDD = importlib.util.find_spec("pysdd") is not None
@@ -19,10 +19,12 @@ def noul_questions(names):
 
 
 def implication(left, right, right_value=True):
-    return {"implies": [
-        {"eq": [{"var": left}, True]},
-        {"eq": [{"var": right}, right_value]},
-    ]}
+    return {
+        "implies": [
+            {"eq": [{"var": left}, True]},
+            {"eq": [{"var": right}, right_value]},
+        ]
+    }
 
 
 @unittest.skipUnless(HAS_SDD, "PySDD is optional")
@@ -32,14 +34,18 @@ class PilotShapeTests(unittest.TestCase):
         request = {
             "state": {},
             "questions": noul_questions(names),
-            "probabilities": {name: 0.2 + index * 0.05 for index, name in enumerate(names)},
+            "probabilities": {
+                name: 0.2 + index * 0.05 for index, name in enumerate(names)
+            },
         }
-        constraints = {"hard": [
-            {"name": "S3-S", "expr": implication("S3", "S")},
-            {"name": "H2-H", "expr": implication("H2", "H")},
-            {"name": "V2-V", "expr": implication("V2", "V")},
-        ]}
-        result = DecisionFlow(backend="sdd").infer(request, constraints)
+        constraints = {
+            "hard": [
+                {"name": "S3-S", "expr": implication("S3", "S")},
+                {"name": "H2-H", "expr": implication("H2", "H")},
+                {"name": "V2-V", "expr": implication("V2", "V")},
+            ]
+        }
+        result = DecisionEngine(backend="sdd").infer(request, constraints)
         self.assertEqual(result.inference.valid_world_count, 108)
 
     def test_toxigen_shape(self):
@@ -51,17 +57,27 @@ class PilotShapeTests(unittest.TestCase):
             ],
             "probabilities": {"toxic": 0.4, "toxicity": [0.1, 0.2, 0.3, 0.2, 0.2]},
         }
-        constraints = {"hard": [
-            {"expr": {"implies": [
-                {"eq": [{"var": "toxicity"}, 0]},
-                {"eq": [{"var": "toxic"}, False]},
-            ]}},
-            {"expr": {"implies": [
-                {"eq": [{"var": "toxicity"}, 4]},
-                {"eq": [{"var": "toxic"}, True]},
-            ]}},
-        ]}
-        result = DecisionFlow(backend="sdd").infer(request, constraints)
+        constraints = {
+            "hard": [
+                {
+                    "expr": {
+                        "implies": [
+                            {"eq": [{"var": "toxicity"}, 0]},
+                            {"eq": [{"var": "toxic"}, False]},
+                        ]
+                    }
+                },
+                {
+                    "expr": {
+                        "implies": [
+                            {"eq": [{"var": "toxicity"}, 4]},
+                            {"eq": [{"var": "toxic"}, True]},
+                        ]
+                    }
+                },
+            ]
+        }
+        result = DecisionEngine(backend="sdd").infer(request, constraints)
         self.assertEqual(result.inference.valid_world_count, 8)
 
     def test_goemotions_shape(self):
@@ -71,11 +87,11 @@ class PilotShapeTests(unittest.TestCase):
             "questions": noul_questions(emotions + ["neutral"]),
             "probabilities": {name: 0.1 for name in emotions + ["neutral"]},
         }
-        constraints = {"hard": [
-            {"expr": implication("neutral", name, False)} for name in emotions
-        ]}
-        result = DecisionFlow(backend="sdd").infer(request, constraints)
-        self.assertEqual(result.inference.valid_world_count, 2 ** 27 + 1)
+        constraints = {
+            "hard": [{"expr": implication("neutral", name, False)} for name in emotions]
+        }
+        result = DecisionEngine(backend="sdd").infer(request, constraints)
+        self.assertEqual(result.inference.valid_world_count, 2**27 + 1)
 
     def test_toxicchat_shape(self):
         request = {
@@ -83,7 +99,7 @@ class PilotShapeTests(unittest.TestCase):
             "questions": noul_questions(["toxic", "jailbreak"]),
             "probabilities": {"toxic": 0.3, "jailbreak": 0.6},
         }
-        result = DecisionFlow(backend="sdd").infer(
+        result = DecisionEngine(backend="sdd").infer(
             request, {"hard": [{"expr": implication("jailbreak", "toxic")}]}
         )
         self.assertEqual(result.inference.valid_world_count, 3)
@@ -92,24 +108,41 @@ class PilotShapeTests(unittest.TestCase):
         names = ["helpfulness", "correctness", "coherence", "complexity", "verbosity"]
         request = {
             "state": {},
-            "questions": [{"id": name, "type": "score", "options": [0, 1, 2, 3, 4]} for name in names],
+            "questions": [
+                {"id": name, "type": "score", "options": [0, 1, 2, 3, 4]}
+                for name in names
+            ],
             "probabilities": {name: [0.2] * 5 for name in names},
         }
-        constraints = {"hard": [
-            {"expr": {"implies": [
-                {"ge": [{"var": "helpfulness"}, 3]},
-                {"ge": [{"var": "correctness"}, 1]},
-            ]}},
-            {"expr": {"implies": [
-                {"ge": [{"var": "helpfulness"}, 3]},
-                {"ge": [{"var": "coherence"}, 1]},
-            ]}},
-            {"expr": {"implies": [
-                {"ge": [{"var": "helpfulness"}, 4]},
-                {"ge": [{"var": "coherence"}, 2]},
-            ]}},
-        ]}
-        result = DecisionFlow(backend="sdd").infer(request, constraints)
+        constraints = {
+            "hard": [
+                {
+                    "expr": {
+                        "implies": [
+                            {"ge": [{"var": "helpfulness"}, 3]},
+                            {"ge": [{"var": "correctness"}, 1]},
+                        ]
+                    }
+                },
+                {
+                    "expr": {
+                        "implies": [
+                            {"ge": [{"var": "helpfulness"}, 3]},
+                            {"ge": [{"var": "coherence"}, 1]},
+                        ]
+                    }
+                },
+                {
+                    "expr": {
+                        "implies": [
+                            {"ge": [{"var": "helpfulness"}, 4]},
+                            {"ge": [{"var": "coherence"}, 2]},
+                        ]
+                    }
+                },
+            ]
+        }
+        result = DecisionEngine(backend="sdd").infer(request, constraints)
         self.assertEqual(result.inference.valid_world_count, 2575)
 
 

@@ -15,7 +15,9 @@ def canonical_value(value: Any) -> Any:
     if isinstance(value, list):
         return tuple(canonical_value(item) for item in value)
     if isinstance(value, dict):
-        return tuple(sorted((key, canonical_value(item)) for key, item in value.items()))
+        return tuple(
+            sorted((key, canonical_value(item)) for key, item in value.items())
+        )
     return value
 
 
@@ -104,7 +106,9 @@ class LocalPotentials:
         normalized: Dict[str, Dict[Scalar, float]] = {}
         for question in request.questions:
             if question.id not in self.values:
-                raise InvalidProbabilityError("missing probabilities for %s" % question.id)
+                raise InvalidProbabilityError(
+                    "missing probabilities for %s" % question.id
+                )
             source = self.values[question.id]
             row: Dict[Scalar, float] = {}
             for option in question.options:
@@ -120,12 +124,18 @@ class LocalPotentials:
                     )
                 value = float(raw)
                 if value < 0:
-                    raise InvalidProbabilityError("negative probability for %s" % question.id)
+                    raise InvalidProbabilityError(
+                        "negative probability for %s" % question.id
+                    )
                 row[option] = value
             total = sum(row.values())
             if total <= 0:
-                raise InvalidProbabilityError("zero probability mass for %s" % question.id)
-            normalized[question.id] = {option: value / total for option, value in row.items()}
+                raise InvalidProbabilityError(
+                    "zero probability mass for %s" % question.id
+                )
+            normalized[question.id] = {
+                option: value / total for option, value in row.items()
+            }
         return LocalPotentials(normalized, self.metadata)
 
 
@@ -140,6 +150,7 @@ class InferenceInfo:
     valid_world_count: Optional[int] = None
     circuit_nodes: Optional[int] = None
     circuit_elements: Optional[int] = None
+    capabilities: Tuple[str, ...] = ()
     notes: Tuple[str, ...] = ()
 
 
@@ -147,17 +158,28 @@ class InferenceInfo:
 class DecisionResult:
     marginals: Mapping[str, Mapping[Scalar, float]]
     joint_map: Mapping[str, Scalar]
-    valid_mass: float
-    map_probability: float
+    valid_mass: Optional[float]
+    map_probability: Optional[float]
     local_potentials: Mapping[str, Mapping[Scalar, float]]
     inference: InferenceInfo
     diagnostics: Mapping[str, Any] = field(default_factory=dict)
+    prediction: Mapping[str, Scalar] = field(default_factory=dict)
+    prediction_kind: str = "joint_map"
+
+    def __post_init__(self) -> None:
+        if not self.prediction and self.joint_map:
+            object.__setattr__(self, "prediction", self.joint_map)
 
     def marginal(self, question_id: str) -> Mapping[Scalar, float]:
         return self.marginals[question_id]
 
+    def supports(self, query: str) -> bool:
+        return query in self.inference.capabilities
+
     def to_dict(self) -> Dict[str, Any]:
         return {
+            "prediction": dict(self.prediction),
+            "prediction_kind": self.prediction_kind,
             "marginals": {key: dict(value) for key, value in self.marginals.items()},
             "joint_map": dict(self.joint_map),
             "valid_mass": self.valid_mass,
@@ -175,6 +197,7 @@ class DecisionResult:
                 "valid_world_count": self.inference.valid_world_count,
                 "circuit_nodes": self.inference.circuit_nodes,
                 "circuit_elements": self.inference.circuit_elements,
+                "capabilities": list(self.inference.capabilities),
                 "notes": list(self.inference.notes),
             },
             "diagnostics": dict(self.diagnostics),

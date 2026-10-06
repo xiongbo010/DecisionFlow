@@ -40,7 +40,9 @@ class HttpJsonScorer:
         endpoint: str,
         headers: Optional[Mapping[str, str]] = None,
         timeout: float = 60.0,
-        response_parser: Optional[Callable[[Any], Mapping[str, Mapping[Any, float]]]] = None,
+        response_parser: Optional[
+            Callable[[Any], Mapping[str, Mapping[Any, float]]]
+        ] = None,
     ):
         self.endpoint = endpoint
         self.headers = dict(headers or {})
@@ -50,7 +52,9 @@ class HttpJsonScorer:
     def score(self, request: DecisionRequest) -> LocalPotentials:
         body = json.dumps(request_to_json(request)).encode("utf-8")
         headers = {"Content-Type": "application/json", **self.headers}
-        http_request = urllib.request.Request(self.endpoint, data=body, headers=headers, method="POST")
+        http_request = urllib.request.Request(
+            self.endpoint, data=body, headers=headers, method="POST"
+        )
         with urllib.request.urlopen(http_request, timeout=self.timeout) as response:
             payload = json.loads(response.read().decode("utf-8"))
         if self.response_parser:
@@ -66,4 +70,6 @@ class HttpJsonScorer:
                     values[question.id] = answer["probabilities"]
         else:
             values = payload.get("probabilities", payload)
-        return LocalPotentials(values, {"provider": self.endpoint}).normalized_for(request)
+        return LocalPotentials(values, {"provider": self.endpoint}).normalized_for(
+            request
+        )

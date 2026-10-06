@@ -46,7 +46,9 @@ class StateValue(Operand):
                 else:
                     current = getattr(current, part)
             except (KeyError, IndexError, AttributeError, ValueError) as error:
-                raise StatePathError("cannot resolve state path %s" % self.path) from error
+                raise StatePathError(
+                    "cannot resolve state path %s" % self.path
+                ) from error
         return current
 
 
@@ -128,9 +130,9 @@ class Implies(Expr):
     consequent: Expr
 
     def evaluate(self, assignment: Mapping[str, Any], state: Any) -> bool:
-        return (not self.antecedent.evaluate(assignment, state)) or self.consequent.evaluate(
-            assignment, state
-        )
+        return (
+            not self.antecedent.evaluate(assignment, state)
+        ) or self.consequent.evaluate(assignment, state)
 
 
 @dataclass(frozen=True)
@@ -139,7 +141,9 @@ class Iff(Expr):
     right: Expr
 
     def evaluate(self, assignment: Mapping[str, Any], state: Any) -> bool:
-        return self.left.evaluate(assignment, state) == self.right.evaluate(assignment, state)
+        return self.left.evaluate(assignment, state) == self.right.evaluate(
+            assignment, state
+        )
 
 
 @dataclass(frozen=True)

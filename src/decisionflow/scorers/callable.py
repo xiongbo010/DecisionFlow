@@ -15,10 +15,11 @@ class CallableScorer:
     def score(self, request: DecisionRequest) -> LocalPotentials:
         result = self.function(request)
         if inspect.isawaitable(result):
-            raise TypeError("async scorers must expose a synchronous wrapper in DecisionFlow v0.0")
+            raise TypeError(
+                "async scorers must expose a synchronous DecisionFlow wrapper"
+            )
         if isinstance(result, LocalPotentials):
             return result.normalized_for(request)
         if isinstance(result, Mapping):
             return LocalPotentials(result).normalized_for(request)
         raise TypeError("scorer callable must return LocalPotentials or a mapping")
-

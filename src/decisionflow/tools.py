@@ -1,121 +1,105 @@
-"""JSON-in/JSON-out functions suitable for agent tool registration.
-
-Providers differ in how tools are registered, so DecisionFlow exposes plain Python
-callables plus provider-neutral JSON Schemas. Applications keep ownership of
-the configured scorer, credentials, transport, and lifecycle.
-"""
+"""Provider-neutral tool functions for declarative decision workflows."""
 
 from __future__ import annotations
 
-from typing import Any, Dict, Mapping, Optional, Sequence
+from typing import Any, Dict, Mapping, Optional
 
-from .engine import DecisionFlow
-from .trajectory import TrajectoryEngine, parse_trajectory
+from .api import DecisionFlow
+from .workflows.inference import create_flow_backend_registry
 
 
-INFER_TOOL_SCHEMA = {
-    "name": "decisionflow_infer",
+RUN_TOOL_SCHEMA = {
+    "name": "decisionflow_run",
     "description": (
-        "Condition typed decision probabilities on declarative constraints and "
-        "return exact marginals, joint MAP, and consistency mass."
+        "Compile a declarative business workflow with a configured decision "
+        "model and run structured probabilistic inference."
     ),
     "input_schema": {
         "type": "object",
         "properties": {
-            "request": {
-                "type": "object",
-                "description": "State, typed questions, and optionally local probabilities.",
+            "state": {"description": "Initial business state."},
+            "workflow": {
+                "type": ["object", "null"],
+                "description": "Workflow document; optional when preconfigured.",
             },
-            "constraints": {
+            "policies": {
                 "type": ["object", "array", "null"],
-                "description": "DecisionFlow JSON hard and soft constraint pack.",
+                "description": "Optional hard and soft decision policies.",
             },
+            "backend": {"type": ["string", "null"]},
+            "backend_options": {"type": ["object", "null"]},
+            "max_worlds": {"type": ["integer", "null"], "minimum": 1},
         },
-        "required": ["request"],
+        "required": ["state"],
         "additionalProperties": False,
     },
 }
 
-EVALUATE_TOOL_SCHEMA = {
-    "name": "decisionflow_evaluate",
-    "description": "Run DecisionFlow inference over a batch of typed decision requests.",
+BACKENDS_TOOL_SCHEMA = {
+    "name": "decisionflow_backends",
+    "description": "List structured-flow inference backends and capabilities.",
     "input_schema": {
         "type": "object",
-        "properties": {
-            "requests": {"type": "array", "items": {"type": "object"}},
-            "constraints": {"type": ["object", "array", "null"]},
-        },
-        "required": ["requests"],
-        "additionalProperties": False,
-    },
-}
-
-TRAJECTORY_TOOL_SCHEMA = {
-    "name": "decisionflow_trajectory",
-    "description": (
-        "Run exact finite-horizon inference over an action policy and stochastic transitions."
-    ),
-    "input_schema": {
-        "type": "object",
-        "properties": {"spec": {"type": "object"}},
-        "required": ["spec"],
+        "properties": {},
         "additionalProperties": False,
     },
 }
 
 
 class DecisionFlowTools:
-    """Bind a configured DecisionFlow engine to serializable tool functions."""
+    schemas = (RUN_TOOL_SCHEMA, BACKENDS_TOOL_SCHEMA)
 
-    schemas = (INFER_TOOL_SCHEMA, EVALUATE_TOOL_SCHEMA, TRAJECTORY_TOOL_SCHEMA)
-
-    def __init__(self, engine: Optional[DecisionFlow] = None):
-        self.engine = engine or DecisionFlow()
-        self.trajectory_engine = TrajectoryEngine()
-
-    def decisionflow_infer(
+    def __init__(
         self,
-        request: Mapping[str, Any],
-        constraints: Any = None,
-    ) -> Dict[str, Any]:
-        return self.engine.infer(request, constraints).to_dict()
+        model: Any,
+        workflow: Any = None,
+        policies: Any = None,
+        *,
+        backend: str = "auto",
+        backend_options: Optional[Mapping[str, Any]] = None,
+        max_worlds: int = 100_000,
+    ):
+        self.model = model
+        self.workflow = workflow
+        self.policies = policies
+        self.backend = backend
+        self.backend_options = dict(backend_options or {})
+        self.max_worlds = max_worlds
 
-    def decisionflow_evaluate(
+    def decisionflow_run(
         self,
-        requests: Sequence[Mapping[str, Any]],
-        constraints: Any = None,
+        state: Any,
+        workflow: Any = None,
+        policies: Any = None,
+        backend: Optional[str] = None,
+        backend_options: Optional[Mapping[str, Any]] = None,
+        max_worlds: Optional[int] = None,
     ) -> Dict[str, Any]:
-        rows = []
-        for index, request in enumerate(requests):
-            identifier = request.get("id", index)
-            try:
-                result = self.engine.infer(request, constraints)
-                rows.append({"id": identifier, "status": "ok", **result.to_dict()})
-            except Exception as error:
-                rows.append(
-                    {
-                        "id": identifier,
-                        "status": "error",
-                        "error": type(error).__name__,
-                        "message": str(error),
-                    }
-                )
+        selected_workflow = self.workflow if workflow is None else workflow
+        if selected_workflow is None:
+            raise ValueError("provide a workflow in the tool call or tool configuration")
+        flow = DecisionFlow(
+            model=self.model,
+            workflow=selected_workflow,
+            policies=self.policies if policies is None else policies,
+            backend=backend or self.backend,
+            backend_options=(
+                self.backend_options if backend_options is None else backend_options
+            ),
+            max_worlds=max_worlds or self.max_worlds,
+        )
+        return flow.infer(state).to_dict()
+
+    def decisionflow_backends(self) -> Dict[str, Any]:
         return {
-            "count": len(rows),
-            "succeeded": sum(row["status"] == "ok" for row in rows),
-            "failed": sum(row["status"] == "error" for row in rows),
-            "results": rows,
+            name: descriptor.to_dict()
+            for name, descriptor in create_flow_backend_registry().describe().items()
         }
 
-    def decisionflow_trajectory(self, spec: Mapping[str, Any]) -> Dict[str, Any]:
-        return self.trajectory_engine.infer(parse_trajectory(spec)).to_dict()
-
     def call(self, name: str, arguments: Mapping[str, Any]) -> Dict[str, Any]:
-        """Dispatch a provider tool call by its registered name."""
         handlers = {
-            "decisionflow_infer": self.decisionflow_infer,
-            "decisionflow_evaluate": self.decisionflow_evaluate,
-            "decisionflow_trajectory": self.decisionflow_trajectory,
+            "decisionflow_run": self.decisionflow_run,
+            "decisionflow_backends": self.decisionflow_backends,
         }
         if name not in handlers:
             raise KeyError("unknown DecisionFlow tool: %s" % name)
