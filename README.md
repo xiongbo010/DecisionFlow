@@ -11,6 +11,7 @@
 
 <p align="center">
   <a href="#install">Install</a> ·
+  <a href="#interactive-demo">Interactive demo</a> ·
   <a href="#declarative-workflow">Workflow</a> ·
   <a href="#python-api">Python API</a> ·
   <a href="docs/inference-backends.md">Inference backends</a>
@@ -43,6 +44,20 @@ decision model ──> WorkflowCompiler
 
 Probabilistic circuits are one inference backend. They do not define the public
 API or the workflow representation.
+
+## Interactive demo
+
+The service-ticket demo makes the full inference loop visible: adjust four
+local typed-decision distributions, enable or disable business policies, and
+watch the valid mass, joint MAP, valid worlds, and constraint-conditioned
+marginals update together.
+
+```bash
+python3 -m http.server 8080 --directory site
+```
+
+Open `http://localhost:8080/demo.html`. The demo is dependency-free and runs
+exact enumeration over its 36 decision worlds directly in the browser.
 
 ## Install
 

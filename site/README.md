@@ -12,6 +12,9 @@ Then open `http://localhost:8080/`. The directory can be deployed independently 
 ## Files
 
 - `index.html`: page structure and project directory;
+- `demo.html`: interactive service-ticket inference demo;
+- `demo.css`: responsive demo-specific visual system;
+- `demo.js`: exact browser-side inference over the demo decision worlds;
 - `styles.css`: light visual system and responsive layouts;
 - `script.js`: mobile navigation, ecosystem filters, reveal transitions, and code copying;
 - `favicon.svg`: DecisionFlow mark.

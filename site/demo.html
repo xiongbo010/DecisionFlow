@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="An interactive DecisionFlow demo for coherent service-ticket decisions." />
+    <meta name="theme-color" content="#f5f7f0" />
+    <title>DecisionFlow Demo · Service ticket</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="demo.css" />
+    <script src="script.js" defer></script>
+    <script src="demo.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#demo-main">Skip to demo</a>
+
+    <header class="site-header">
+      <div class="nav-shell">
+        <a class="brand" href="index.html" aria-label="DecisionFlow home">
+          <span class="brand-mark" aria-hidden="true">
+            <span class="mark-node mark-node-a"></span>
+            <span class="mark-node mark-node-b"></span>
+            <span class="mark-node mark-node-c"></span>
+          </span>
+          <span class="brand-wordmark">DecisionFlow</span>
+        </a>
+
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">
+          <span class="sr-only">Toggle navigation</span>
+          <span></span><span></span>
+        </button>
+
+        <nav id="primary-nav" class="primary-nav" aria-label="Primary navigation">
+          <a href="demo.html" aria-current="page">Live demo</a>
+          <a href="index.html#framework">Framework</a>
+          <a href="index.html#benchmarks">Benchmarks</a>
+          <a href="index.html#quickstart">Quickstart</a>
+        </nav>
+
+        <div class="nav-actions">
+          <a class="button button-ghost" href="https://github.com/xiongbo010/DecisionFlow" target="_blank" rel="noreferrer">GitHub ↗</a>
+          <a class="button button-primary" href="index.html#quickstart">Run locally <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+    </header>
+
+    <main id="demo-main">
+      <section class="demo-intro section-shell">
+        <span class="eyebrow">Interactive exact inference</span>
+        <h1>One ticket. Four judgments.<br /><span>One coherent decision flow.</span></h1>
+        <p>Adjust a decision model's local probabilities and watch DecisionFlow redistribute probability across complete, policy-compliant outcomes.</p>
+      </section>
+
+      <section class="section-shell demo-shell" aria-label="Interactive service-ticket decision demo">
+        <div class="demo-toolbar">
+          <div>
+            <span class="demo-kicker">Service ticket · T-104</span>
+            <strong>Possible account takeover and duplicate charge</strong>
+          </div>
+          <div class="preset-controls" role="group" aria-label="Model probability presets">
+            <button class="preset-button active" type="button" data-preset="conflicted">Conflicted</button>
+            <button class="preset-button" type="button" data-preset="uncertain">Uncertain</button>
+            <button class="preset-button" type="button" data-preset="aligned">Already coherent</button>
+          </div>
+        </div>
+
+        <div class="ticket-state">
+          <div class="ticket-avatar" aria-hidden="true">CB</div>
+          <div>
+            <span>Customer message</span>
+            <blockquote>“I saw a login from a device I don't recognize, and my credit card was charged twice. Please fix this today.”</blockquote>
+          </div>
+          <div class="state-facts" aria-label="Observed ticket facts">
+            <span>unknown device</span><span>duplicate charge</span><span>card channel</span>
+          </div>
+        </div>
+
+        <div class="demo-grid">
+          <aside class="model-controls" aria-labelledby="model-scores-heading">
+            <div class="panel-heading">
+              <div><span>01</span><h2 id="model-scores-heading">Local model scores</h2></div>
+              <small>independent typed outputs</small>
+            </div>
+
+            <div class="score-control">
+              <div><span class="type-chip choice">Choice</span><label for="route-score">Route to Security</label><output id="route-value">42%</output></div>
+              <input id="route-score" type="range" min="5" max="95" value="42" />
+              <p><span>Billing <b id="route-billing">58%</b></span><span>Security <b id="route-security">42%</b></span></p>
+            </div>
+
+            <div class="score-control">
+              <div><span class="type-chip noul">Noul</span><label for="fraud-score">Fraud is true</label><output id="fraud-value">78%</output></div>
+              <input id="fraud-score" type="range" min="5" max="95" value="78" />
+              <p><span>No <b id="fraud-no">22%</b></span><span>Yes <b id="fraud-yes">78%</b></span></p>
+            </div>
+
+            <div class="score-control">
+              <div><span class="type-chip score">Score</span><label for="urgency-score">Urgency is High</label><output id="urgency-value">64%</output></div>
+              <input id="urgency-score" type="range" min="10" max="90" value="64" />
+              <p><span>Low / Medium <b id="urgency-rest">36%</b></span><span>High <b id="urgency-high">64%</b></span></p>
+            </div>
+
+            <div class="score-control">
+              <div><span class="type-chip choice">Choice</span><label for="action-score">Action: Refund only</label><output id="action-value">54%</output></div>
+              <input id="action-score" type="range" min="5" max="85" value="54" />
+              <p><span>Other actions <b id="action-rest">46%</b></span><span>Refund only <b id="action-refund">54%</b></span></p>
+            </div>
+          </aside>
+
+          <section class="policy-panel" aria-labelledby="policies-heading">
+            <div class="panel-heading">
+              <div><span>02</span><h2 id="policies-heading">Decision semantics</h2></div>
+              <small>declarative policy</small>
+            </div>
+            <div class="policy-list">
+              <label><input type="checkbox" data-policy="fraudRoute" checked /><span><b>Fraud → Security</b><small>A suspected fraud ticket must reach the security team.</small></span></label>
+              <label><input type="checkbox" data-policy="fraudAction" checked /><span><b>Fraud → Secure or review</b><small>Refund-only resolution cannot close a fraud case.</small></span></label>
+              <label><input type="checkbox" data-policy="highAction" checked /><span><b>High urgency → active intervention</b><small>A high-urgency ticket cannot receive refund only.</small></span></label>
+              <label><input type="checkbox" data-policy="securityAction" checked /><span><b>Security → secure or review</b><small>Security routing requires an account-focused action.</small></span></label>
+            </div>
+            <div class="world-counter"><strong>36</strong><span>candidate decision worlds</span><i aria-hidden="true">→</i><strong id="valid-world-count">15</strong><span>valid worlds</span></div>
+          </section>
+
+          <section class="inference-panel" aria-labelledby="inference-heading">
+            <div class="panel-heading">
+              <div><span>03</span><h2 id="inference-heading">Structured inference</h2></div>
+              <small>exact enumeration</small>
+            </div>
+            <div class="inference-metrics">
+              <div><span>Valid mass</span><strong id="valid-mass">0.000</strong><small>probability already coherent</small></div>
+              <div><span>Worlds removed</span><strong id="worlds-removed">0%</strong><small>by active policies</small></div>
+            </div>
+            <div class="top-worlds">
+              <div class="top-worlds-heading"><span>Highest-probability valid worlds</span><small>posterior</small></div>
+              <ol id="top-world-list"></ol>
+            </div>
+          </section>
+        </div>
+
+        <div class="decision-comparison" aria-live="polite">
+          <article class="decision-result local-result">
+            <div class="result-heading"><span>Local argmax</span><strong id="local-status">Conflicted</strong></div>
+            <div id="local-path" class="decision-path"></div>
+            <ul id="local-violations" class="violation-list"></ul>
+          </article>
+
+          <div class="compile-bridge" aria-hidden="true"><span>compile + infer</span><i>→</i></div>
+
+          <article class="decision-result structured-result">
+            <div class="result-heading"><span>DecisionFlow joint MAP</span><strong>Coherent</strong></div>
+            <div id="map-path" class="decision-path"></div>
+            <p id="map-probability" class="map-probability"></p>
+          </article>
+        </div>
+
+        <div class="marginal-section">
+          <div class="panel-heading">
+            <div><span>04</span><h2>Constraint-conditioned marginals</h2></div>
+            <small>all valid continuations aggregated</small>
+          </div>
+          <div id="marginal-grid" class="marginal-grid"></div>
+        </div>
+      </section>
+
+      <section class="demo-explainer section-shell">
+        <span class="kicker">What this demonstrates</span>
+        <h2>The model still supplies every probability. DecisionFlow supplies the structure.</h2>
+        <p>The browser evaluates all 36 complete worlds, removes those that violate the active policies, normalizes the remaining mass, and derives the joint MAP and every displayed marginal from the same posterior.</p>
+        <div class="hero-actions">
+          <a class="button button-primary button-large" href="https://github.com/xiongbo010/DecisionFlow" target="_blank" rel="noreferrer">Build with DecisionFlow ↗</a>
+          <a class="button button-ghost button-large" href="index.html#framework">Explore the framework</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="section-shell footer-grid">
+        <div>
+          <a class="brand" href="index.html">
+            <span class="brand-mark small" aria-hidden="true"><span class="mark-node mark-node-a"></span><span class="mark-node mark-node-b"></span><span class="mark-node mark-node-c"></span></span>
+            <span class="brand-wordmark">DecisionFlow</span>
+          </a>
+          <p>Turning local judgments into globally coherent decisions—fast.</p>
+        </div>
+        <div class="footer-links">
+          <a href="index.html">Home</a>
+          <a href="https://github.com/xiongbo010/DecisionFlow" target="_blank" rel="noreferrer">GitHub</a>
+          <a href="https://github.com/xiongbo010/DecisionFlow#readme" target="_blank" rel="noreferrer">Documentation</a>
+        </div>
+      </div>
+      <div class="section-shell footer-bottom"><span>© 2026 DecisionFlow contributors</span><span>Interactive values are illustrative model probabilities.</span></div>
+    </footer>
+  </body>
+</html>
