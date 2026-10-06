@@ -4,7 +4,7 @@
 
 <h1 align="center">DecisionFlow</h1>
 
-<p align="center"><strong>Decisions that agree.</strong></p>
+<p align="center"><strong>Turning local judgments into globally coherent decisions—fast.</strong></p>
 
 <p align="center">
   Open infrastructure for modeling complete decision flows, from local model
