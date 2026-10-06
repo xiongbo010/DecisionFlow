@@ -1,8 +1,7 @@
-<p align="center">
-  <img src="site/favicon.svg" width="104" alt="DecisionFlow logo" />
-</p>
-
-<h1 align="center">DecisionFlow</h1>
+<h1 align="center">
+  <img src="site/favicon.svg" width="72" alt="DecisionFlow logo" align="absmiddle" />
+  DecisionFlow <sup>v0.1</sup>
+</h1>
 
 <p align="center"><strong>Turning local judgments into globally coherent decisions—fast.</strong></p>
 
