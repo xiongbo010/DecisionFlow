@@ -1,3 +1,28 @@
+.demo-mode-switch {
+  display: inline-flex;
+  margin-bottom: 22px;
+  padding: 4px;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.demo-mode-switch a {
+  padding: 8px 15px;
+  color: var(--ink-soft);
+  border-radius: 8px;
+  font-size: 0.74rem;
+  font-weight: 720;
+}
+
+.demo-mode-switch a:hover,
+.demo-mode-switch a.active {
+  color: var(--ink);
+  background: var(--paper-bright);
+  box-shadow: 0 5px 15px rgba(43, 67, 57, 0.08);
+}
+
 .demo-intro {
   padding: 112px 0 58px;
   text-align: center;

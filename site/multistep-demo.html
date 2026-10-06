@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="An interactive DecisionFlow demo for exact multi-step trajectory inference." />
+    <meta name="theme-color" content="#f5f7f0" />
+    <title>DecisionFlow Demo · Multi-step ticket resolution</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="demo.css" />
+    <link rel="stylesheet" href="multistep-demo.css" />
+    <script src="script.js" defer></script>
+    <script src="multistep-demo.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#demo-main">Skip to demo</a>
+
+    <header class="site-header">
+      <div class="nav-shell">
+        <a class="brand" href="index.html" aria-label="DecisionFlow home">
+          <span class="brand-mark" aria-hidden="true">
+            <span class="mark-node mark-node-a"></span>
+            <span class="mark-node mark-node-b"></span>
+            <span class="mark-node mark-node-c"></span>
+          </span>
+          <span class="brand-wordmark">DecisionFlow</span>
+        </a>
+
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">
+          <span class="sr-only">Toggle navigation</span><span></span><span></span>
+        </button>
+
+        <nav id="primary-nav" class="primary-nav" aria-label="Primary navigation">
+          <a href="multistep-demo.html" aria-current="page">Live demo</a>
+          <a href="index.html#framework">Framework</a>
+          <a href="index.html#benchmarks">Benchmarks</a>
+          <a href="index.html#quickstart">Quickstart</a>
+        </nav>
+
+        <div class="nav-actions">
+          <a class="button button-ghost" href="https://github.com/xiongbo010/DecisionFlow" target="_blank" rel="noreferrer">GitHub ↗</a>
+          <a class="button button-primary" href="index.html#quickstart">Run locally <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+    </header>
+
+    <main id="demo-main">
+      <section class="demo-intro section-shell trajectory-intro">
+        <div class="demo-mode-switch" aria-label="Demo mode">
+          <a href="demo.html">Single-step</a>
+          <a class="active" href="multistep-demo.html" aria-current="page">Multi-step</a>
+        </div>
+        <span class="eyebrow">Interactive trajectory inference</span>
+        <h1>One ticket. Three steps.<br /><span>Every future counted.</span></h1>
+        <p>Change the local decisions at each step and watch DecisionFlow recompute the probability distribution over complete, policy-compliant trajectories.</p>
+      </section>
+
+      <section class="section-shell trajectory-shell" aria-label="Interactive multi-step service-ticket demo">
+        <div class="demo-toolbar">
+          <div>
+            <span class="demo-kicker">Service ticket · T-104</span>
+            <strong>Unknown-device login and duplicate card charge</strong>
+          </div>
+          <div class="preset-controls" role="group" aria-label="Trajectory model presets">
+            <button class="preset-button active" type="button" data-trajectory-preset="conflicted">Locally conflicted</button>
+            <button class="preset-button" type="button" data-trajectory-preset="uncertain">Uncertain</button>
+            <button class="preset-button" type="button" data-trajectory-preset="aligned">Already coherent</button>
+          </div>
+        </div>
+
+        <div class="ticket-state">
+          <div class="ticket-avatar" aria-hidden="true">CB</div>
+          <div>
+            <span>Initial state · x₁</span>
+            <blockquote>“I saw a login from a device I don't recognize, and my credit card was charged twice. Please fix this today.”</blockquote>
+          </div>
+          <div class="state-facts" aria-label="Observed ticket facts">
+            <span>unknown device</span><span>duplicate charge</span><span>card channel</span>
+          </div>
+        </div>
+
+        <div class="trajectory-control-grid">
+          <section class="step-control" aria-labelledby="step-one-heading">
+            <div class="step-control-heading"><span>Step 1</span><div><h2 id="step-one-heading">Intake decisions</h2><small>state x₁ · ticket evidence</small></div></div>
+            <div class="score-control compact">
+              <div><span class="type-chip choice">Choice</span><label for="ms-route-score">Route to Security</label><output id="ms-route-value">42%</output></div>
+              <input id="ms-route-score" type="range" min="5" max="95" value="42" />
+              <p><span>Billing</span><span>Security</span></p>
+            </div>
+            <div class="score-control compact">
+              <div><span class="type-chip noul">Noul</span><label for="ms-fraud-score">Fraud is true</label><output id="ms-fraud-value">78%</output></div>
+              <input id="ms-fraud-score" type="range" min="5" max="95" value="78" />
+              <p><span>No fraud</span><span>Fraud</span></p>
+            </div>
+            <div class="score-control compact">
+              <div><span class="type-chip score">Score</span><label for="ms-urgency-score">Urgency is High</label><output id="ms-urgency-value">64%</output></div>
+              <input id="ms-urgency-score" type="range" min="5" max="95" value="64" />
+              <p><span>Normal</span><span>High</span></p>
+            </div>
+          </section>
+
+          <div class="step-arrow" aria-hidden="true"><span>state transition</span><i>→</i></div>
+
+          <section class="step-control" aria-labelledby="step-two-heading">
+            <div class="step-control-heading"><span>Step 2</span><div><h2 id="step-two-heading">Resolution action</h2><small>state x₂ · selected queue</small></div></div>
+            <p class="conditional-note">The model scores actions after observing the Step 1 route. The slider controls confidence in the queue-aligned action.</p>
+            <div class="score-control focus-control">
+              <div><span class="type-chip choice">Choice</span><label for="ms-handling-score">Queue-aligned action</label><output id="ms-handling-value">68%</output></div>
+              <input id="ms-handling-score" type="range" min="10" max="90" value="68" />
+              <p><span>Other continuation</span><span>Preferred action</span></p>
+            </div>
+            <div class="conditional-distributions">
+              <div><span>If Security</span><strong>Secure account</strong></div>
+              <div><span>If Billing</span><strong>Refund charge</strong></div>
+              <small>Manual review remains available on either branch.</small>
+            </div>
+          </section>
+
+          <div class="step-arrow" aria-hidden="true"><span>state transition</span><i>→</i></div>
+
+          <section class="step-control" aria-labelledby="step-three-heading">
+            <div class="step-control-heading"><span>Step 3</span><div><h2 id="step-three-heading">Follow-up decision</h2><small>state x₃ · action outcome</small></div></div>
+            <p class="conditional-note">The final distribution depends on the selected resolution action.</p>
+            <div class="score-control focus-control">
+              <div><span class="type-chip choice">Choice</span><label for="ms-followup-score">Action-aligned follow-up</label><output id="ms-followup-value">66%</output></div>
+              <input id="ms-followup-score" type="range" min="10" max="90" value="66" />
+              <p><span>Other outcome</span><span>Preferred outcome</span></p>
+            </div>
+            <div class="conditional-distributions three-way">
+              <div><span>Secure</span><strong>Notify &amp; monitor</strong></div>
+              <div><span>Refund</span><strong>Close ticket</strong></div>
+              <div><span>Review</span><strong>Escalate</strong></div>
+            </div>
+          </section>
+        </div>
+
+        <section class="trajectory-policies" aria-labelledby="trajectory-policies-heading">
+          <div class="panel-heading">
+            <div><span>Policy</span><h2 id="trajectory-policies-heading">Cross-step decision semantics</h2></div>
+            <small>declarative workflow + temporal constraints</small>
+          </div>
+          <div class="trajectory-policy-grid">
+            <label><input type="checkbox" data-trajectory-policy="fraudRoute" checked /><span><b>Fraud → Security route</b><small>The first decision must use the security branch.</small></span></label>
+            <label><input type="checkbox" data-trajectory-policy="securityAction" checked /><span><b>Security → Secure or review</b><small>A security case cannot jump to refund-only handling.</small></span></label>
+            <label><input type="checkbox" data-trajectory-policy="billingAction" checked /><span><b>Billing → Refund or review</b><small>A billing branch cannot perform an account-security action.</small></span></label>
+            <label><input type="checkbox" data-trajectory-policy="fraudClosure" checked /><span><b>Fraud → Keep case active</b><small>A suspected fraud trajectory cannot terminate by closing the ticket.</small></span></label>
+            <label><input type="checkbox" data-trajectory-policy="highClosure" checked /><span><b>High urgency → Keep case active</b><small>A high-urgency trajectory must notify, monitor, or escalate.</small></span></label>
+            <label><input type="checkbox" data-trajectory-policy="reviewEscalate" checked /><span><b>Review → Escalate next</b><small>Manual review must be followed by escalation.</small></span></label>
+          </div>
+          <div class="world-counter trajectory-world-counter"><strong>72</strong><span>candidate trajectories</span><i aria-hidden="true">→</i><strong id="ms-valid-count">0</strong><span>valid trajectories</span></div>
+        </section>
+
+        <section class="trajectory-inference" aria-live="polite">
+          <div class="trajectory-metrics">
+            <div><span>Valid mass</span><strong id="ms-valid-mass">0.000</strong><small>probability assigned to valid trajectories</small></div>
+            <div><span>First-step marginal</span><strong id="ms-security-marginal">0.0%</strong><small>q(Route₁ = Security | all valid futures)</small></div>
+            <div><span>MAP trajectory</span><strong id="ms-map-probability">0.0%</strong><small>posterior after trajectory normalization</small></div>
+          </div>
+
+          <div class="trajectory-comparison">
+            <article class="trajectory-result local-trajectory-result">
+              <div class="result-heading"><span>Stepwise greedy trajectory</span><strong id="ms-local-status">Conflicted</strong></div>
+              <div id="ms-local-path" class="timeline-path"></div>
+              <ul id="ms-local-violations" class="violation-list"></ul>
+            </article>
+
+            <div class="compile-bridge" aria-hidden="true"><span>sum over futures</span><i>→</i></div>
+
+            <article class="trajectory-result map-trajectory-result">
+              <div class="result-heading"><span>DecisionFlow trajectory MAP</span><strong>Coherent</strong></div>
+              <div id="ms-map-path" class="timeline-path"></div>
+              <p id="ms-map-caption" class="map-probability"></p>
+            </article>
+          </div>
+
+          <div class="trajectory-analysis-grid">
+            <section class="trajectory-ranking">
+              <div class="panel-heading"><div><span>01</span><h2>Highest-probability valid trajectories</h2></div><small>posterior</small></div>
+              <ol id="ms-top-trajectories"></ol>
+            </section>
+            <section class="trajectory-marginals">
+              <div class="panel-heading"><div><span>02</span><h2>Future-aware marginals</h2></div><small>all valid continuations aggregated</small></div>
+              <div id="ms-marginals" class="trajectory-marginal-list"></div>
+            </section>
+          </div>
+        </section>
+      </section>
+
+      <section class="demo-explainer section-shell">
+        <span class="kicker">What changes in the multi-step case</span>
+        <h2>The first decision is scored by every valid future it can reach.</h2>
+        <p>DecisionFlow evaluates all 72 complete trajectories under a directed local model, removes paths that violate workflow or temporal requirements, and then derives the first-step marginal, downstream marginals, and trajectory MAP from one normalized distribution.</p>
+        <div class="hero-actions">
+          <a class="button button-primary button-large" href="https://github.com/xiongbo010/DecisionFlow" target="_blank" rel="noreferrer">Build with DecisionFlow ↗</a>
+          <a class="button button-ghost button-large" href="demo.html">See the single-step demo</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="section-shell footer-grid">
+        <div>
+          <a class="brand" href="index.html">
+            <span class="brand-mark small" aria-hidden="true"><span class="mark-node mark-node-a"></span><span class="mark-node mark-node-b"></span><span class="mark-node mark-node-c"></span></span>
+            <span class="brand-wordmark">DecisionFlow</span>
+          </a>
+          <p>Turning local judgments into globally coherent decisions—fast.</p>
+        </div>
+        <div class="footer-links">
+          <a href="index.html">Home</a><a href="demo.html">Single-step demo</a>
+          <a href="https://github.com/xiongbo010/DecisionFlow" target="_blank" rel="noreferrer">GitHub</a>
+        </div>
+      </div>
+      <div class="section-shell footer-bottom"><span>© 2026 DecisionFlow contributors</span><span>Interactive values are illustrative model probabilities.</span></div>
+    </footer>
+  </body>
+</html>

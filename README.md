@@ -47,17 +47,20 @@ API or the workflow representation.
 
 ## Interactive demo
 
-The service-ticket demo makes the full inference loop visible: adjust four
-local typed-decision distributions, enable or disable business policies, and
-watch the valid mass, joint MAP, valid worlds, and constraint-conditioned
-marginals update together.
+The service-ticket demos make the full inference loop visible. The default
+multi-step view scores a three-step ticket trajectory, applies workflow and
+temporal policies, and recomputes the first-step marginal, downstream
+marginals, valid mass, and trajectory MAP. A compact single-step view is also
+included for comparison.
 
 ```bash
 python3 -m http.server 8080 --directory site
 ```
 
-Open `http://localhost:8080/demo.html`. The demo is dependency-free and runs
-exact enumeration over its 36 decision worlds directly in the browser.
+Open `http://localhost:8080/multistep-demo.html`. The demo is dependency-free
+and runs exact inference over 72 complete trajectories directly in the
+browser. The original 36-world single-step example remains at
+`http://localhost:8080/demo.html`.
 
 ## Install
 

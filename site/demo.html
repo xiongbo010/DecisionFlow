@@ -32,7 +32,7 @@
         </button>
 
         <nav id="primary-nav" class="primary-nav" aria-label="Primary navigation">
-          <a href="demo.html" aria-current="page">Live demo</a>
+          <a href="multistep-demo.html">Live demo</a>
           <a href="index.html#framework">Framework</a>
           <a href="index.html#benchmarks">Benchmarks</a>
           <a href="index.html#quickstart">Quickstart</a>
@@ -47,6 +47,10 @@
 
     <main id="demo-main">
       <section class="demo-intro section-shell">
+        <div class="demo-mode-switch" aria-label="Demo mode">
+          <a class="active" href="demo.html" aria-current="page">Single-step</a>
+          <a href="multistep-demo.html">Multi-step</a>
+        </div>
         <span class="eyebrow">Interactive exact inference</span>
         <h1>One ticket. Four judgments.<br /><span>One coherent decision flow.</span></h1>
         <p>Adjust a decision model's local probabilities and watch DecisionFlow redistribute probability across complete, policy-compliant outcomes.</p>
@@ -168,8 +172,8 @@
         <h2>The model still supplies every probability. DecisionFlow supplies the structure.</h2>
         <p>The browser evaluates all 36 complete worlds, removes those that violate the active policies, normalizes the remaining mass, and derives the joint MAP and every displayed marginal from the same posterior.</p>
         <div class="hero-actions">
-          <a class="button button-primary button-large" href="https://github.com/xiongbo010/DecisionFlow" target="_blank" rel="noreferrer">Build with DecisionFlow ↗</a>
-          <a class="button button-ghost button-large" href="index.html#framework">Explore the framework</a>
+          <a class="button button-primary button-large" href="multistep-demo.html">Try multi-step inference →</a>
+          <a class="button button-ghost button-large" href="https://github.com/xiongbo010/DecisionFlow" target="_blank" rel="noreferrer">Build with DecisionFlow ↗</a>
         </div>
       </section>
     </main>

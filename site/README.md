@@ -15,6 +15,9 @@ Then open `http://localhost:8080/`. The directory can be deployed independently 
 - `demo.html`: interactive service-ticket inference demo;
 - `demo.css`: responsive demo-specific visual system;
 - `demo.js`: exact browser-side inference over the demo decision worlds;
+- `multistep-demo.html`: interactive three-step service-ticket trajectory demo;
+- `multistep-demo.css`: multi-step timeline, policy, and trajectory layouts;
+- `multistep-demo.js`: exact inference over directed three-step trajectories;
 - `styles.css`: light visual system and responsive layouts;
 - `script.js`: mobile navigation, ecosystem filters, reveal transitions, and code copying;
 - `favicon.svg`: DecisionFlow mark.
